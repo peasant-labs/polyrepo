@@ -13,8 +13,7 @@ run again.
 ```sh
 git clone git@github.com:peasant-labs/polyrepo.git \
   && cd polyrepo \
-  && scripts/provision-all \
-  && scripts/sync-all
+  && scripts/provision-all
 ```
 
 ## Optional: the dev shell
@@ -45,11 +44,8 @@ add nix-direnv to cache the shell, so entering the directory is faster.
 
 1. `git clone` gets this repository.
 2. `scripts/provision-all` clones each repository named in `repos.txt`
-   and sets up its worktrees.
-3. `scripts/sync-all` fast-forwards the default-branch worktree of each
-   repository (`develop` or `main`, as set on the remote). Other
-   worktrees are not touched.
-4. `direnv allow` (optional) trusts `.envrc`, which loads the dev shell
+   at the current remote state and sets up its worktrees.
+3. `direnv allow` (optional) trusts `.envrc`, which loads the dev shell
    from `flake.nix` each time you enter the directory.
 
 ## Repository host layout
@@ -73,9 +69,11 @@ sibling checkout to build.
 
 ## Daily use
 
-Run `scripts/sync-all` to bring the default-branch worktree of every
-repository up to date with its remote. Update a feature worktree by
-hand with `git pull` inside it.
+Run `scripts/sync-all` to fast-forward the default-branch worktree
+(`develop` or `main`, as set on the remote) of every repository. Other
+worktrees are not touched; update a feature worktree by hand with
+`git pull` inside it. A fresh provision is already current, so there is
+no need to run this right after `scripts/provision-all`.
 
 ## Add a repository
 
