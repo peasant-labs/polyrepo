@@ -5,18 +5,28 @@ peasant-labs repositories. It does not hold any product code.
 
 ## Quick start
 
-You need git and an SSH key that is registered on GitHub. Then run the
-three blocks below, one at a time. Each block is safe to run again.
+You need git and an SSH key that is registered on GitHub. Nothing else.
+Run this one command. It clones this repository, then clones the six
+peasant-labs repositories into the `polyrepo` directory. It is safe to
+run again.
 
-1. Install Nix with flakes enabled (Linux, macOS, and WSL2). Open a new
-   shell when it finishes.
+```sh
+git clone git@github.com:peasant-labs/polyrepo.git \
+  && cd polyrepo \
+  && scripts/provision-all \
+  && scripts/sync-all
+```
+
+## Optional: the dev shell
+
+`flake.nix` gives one dev shell with the toolchain for every repository
+(Go, Node, pnpm, linters, cloud CLIs). You do not need it to clone or
+sync. To use it, install Nix and direnv, then trust `.envrc`. Open a new
+shell after each block.
 
 ```sh
 curl -fsSL https://install.determinate.systems/nix | sh -s -- install
 ```
-
-2. Install direnv and hook it into your shell. Use the `.zshrc` line for
-   zsh, or the `.bashrc` line for bash. Open a new shell when done.
 
 ```sh
 nix profile install nixpkgs#direnv
@@ -24,38 +34,23 @@ echo 'eval "$(direnv hook zsh)"'  >> ~/.zshrc
 echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
 ```
 
-3. Clone this repository and provision the workspace. This clones the
-   six peasant-labs repositories into the `polyrepo` directory and
-   enters the dev shell.
-
 ```sh
-git clone git@github.com:peasant-labs/polyrepo.git \
-  && cd polyrepo \
-  && direnv allow \
-  && nix develop --command scripts/provision-all \
-  && nix develop --command scripts/sync-all
+cd polyrepo && direnv allow
 ```
 
-After this, `cd polyrepo` enters the dev shell by itself.
-
-## Prerequisites
-
-- git.
-- An SSH key registered on GitHub.
-- Nix with flakes (the Quick start installs it).
-- direnv (the Quick start installs it). Optional: add nix-direnv to
-  cache the dev shell, so entering the directory is faster.
+After this, `cd polyrepo` enters the dev shell by itself. Optional:
+add nix-direnv to cache the shell, so entering the directory is faster.
 
 ## What the steps do
 
 1. `git clone` gets this repository.
-2. `direnv allow` trusts `.envrc`, which loads the dev shell from
-   `flake.nix` each time you enter the directory.
-3. `scripts/provision-all` clones each repository named in `repos.txt`
+2. `scripts/provision-all` clones each repository named in `repos.txt`
    and sets up its worktrees.
-4. `scripts/sync-all` fast-forwards the default-branch worktree of each
+3. `scripts/sync-all` fast-forwards the default-branch worktree of each
    repository (`develop` or `main`, as set on the remote). Other
    worktrees are not touched.
+4. `direnv allow` (optional) trusts `.envrc`, which loads the dev shell
+   from `flake.nix` each time you enter the directory.
 
 ## Repository host layout
 
