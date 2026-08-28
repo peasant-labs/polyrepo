@@ -25,7 +25,7 @@ optional dev shell in the next section.
 | tool | version | install |
 |---|---|---|
 | Go | 1.26 (the modules require at least 1.25) | https://go.dev/dl/ or your package manager |
-| Node | 24 (26 also works) | https://nodejs.org/ or a version manager such as `fnm` or `nvm` |
+| Node | 26 | https://nodejs.org/ or a version manager such as `fnm` or `nvm` |
 | pnpm | per repository, pinned in `package.json` | `corepack enable` (ships with Node) |
 
 Each JavaScript repository pins its own pnpm version in the

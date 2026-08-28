@@ -45,7 +45,7 @@
           pnpm
           typescript
           typescript-language-server
-          nodejs_24
+          nodejs_26
         ];
 
         # Contract-gate CLIs that nixpkgs does not package. Built from source.
