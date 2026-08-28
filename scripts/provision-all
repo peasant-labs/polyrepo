@@ -20,26 +20,32 @@ if ! command -v git > /dev/null 2>&1; then
   die 1 "git is not on PATH" \
     "provision-all could not find the git command" \
     "provision-all, pre-flight" \
-    "enter the dev shell: run direnv allow"
+    "install git for your OS, then run scripts/provision-all again"
+fi
+
+if ! repo_lines="$(read_repos "${POLYREPO_ROOT}/repos.txt")"; then
+  exit 2
 fi
 
 provisioned=0
 skipped=0
 failed=0
 
-while IFS=' ' read -r url dir; do
-  target="${POLYREPO_ROOT}/${dir}"
-  if [ -e "${target}" ]; then
-    log "skip" "${dir} exists"
-    skipped=$((skipped + 1))
-    continue
-  fi
-  if ! "${SCRIPT_DIR}/git-provision" "${url}" "${target}"; then
-    failed=$((failed + 1))
-    continue
-  fi
-  provisioned=$((provisioned + 1))
-done < <(read_repos "${POLYREPO_ROOT}/repos.txt")
+if [ -n "${repo_lines}" ]; then
+  while IFS=' ' read -r url dir; do
+    target="${POLYREPO_ROOT}/${dir}"
+    if [ -e "${target}" ]; then
+      log "skip" "${dir} exists"
+      skipped=$((skipped + 1))
+      continue
+    fi
+    if ! "${SCRIPT_DIR}/git-provision" "${url}" "${target}"; then
+      failed=$((failed + 1))
+      continue
+    fi
+    provisioned=$((provisioned + 1))
+  done <<< "${repo_lines}"
+fi
 
 log "done" "${provisioned} provisioned, ${skipped} skipped, ${failed} failed"
 

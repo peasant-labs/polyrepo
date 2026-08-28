@@ -29,13 +29,18 @@ if [ -e "${dir}" ]; then
   die 1 "target directory already exists" \
     "${dir} is already present, so git-provision will not overwrite it" \
     "git-provision, before cloning ${url} into ${dir}" \
-    "remove or rename ${dir}, or choose a different dir in repos.txt"
+    "remove or rename ${dir}, or pass a different dir"
 fi
 
 log "clone" "${url} -> ${dir}"
-git clone --no-checkout "${url}" "${dir}"
+if ! git clone --no-checkout "${url}" "${dir}" > /dev/null 2>&1; then
+  die 1 "git clone failed" \
+    "git clone --no-checkout could not fetch ${url} into ${dir}" \
+    "git-provision, cloning ${url} into ${dir}" \
+    "check the ssh key on GitHub, check the url in repos.txt, check the network"
+fi
 
-(
+if ! (
   cd "${dir}"
   git switch --orphan __dummy__
   {
@@ -44,12 +49,22 @@ git clone --no-checkout "${url}" "${dir}"
   } > .gitignore
   git add .gitignore
   git commit -q -m "host: ignore every worktree directory"
-)
+) > /dev/null 2>&1; then
+  die 1 "orphan host branch setup failed" \
+    "git switch --orphan, git add or git commit did not succeed in ${dir}" \
+    "git-provision, building the __dummy__ host branch in ${dir}" \
+    "inspect ${dir} by hand; the partial clone is left in place for review"
+fi
 
 found_branch=0
 for b in main develop; do
-  if git -C "${dir}" rev-parse --verify -q "refs/remotes/origin/${b}" > /dev/null 2>&1; then
-    git -C "${dir}" worktree add -B "${b}" "${b}" "origin/${b}"
+  if remote_branch_exists "${dir}" "${b}"; then
+    if ! git -C "${dir}" worktree add -B "${b}" "${b}" "origin/${b}" > /dev/null 2>&1; then
+      die 1 "git worktree add failed" \
+        "git worktree add could not create ${dir}/${b} from origin/${b}" \
+        "git-provision, adding the ${b} worktree in ${dir}" \
+        "inspect ${dir} by hand; the host and any earlier worktrees are left in place for review"
+    fi
     log "worktree" "${dir}/${b} added from origin/${b}"
     found_branch=1
   else

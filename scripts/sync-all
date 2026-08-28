@@ -16,64 +16,65 @@ fi
 
 POLYREPO_ROOT="${POLYREPO_ROOT:-$(dirname "${SCRIPT_DIR}")}"
 
-# report_failure <what> <why> <where> <fix>
-# Print one failure to stderr, in the same shape as die, without exiting.
-report_failure() {
-  local what="$1" why="$2" where="$3" fix="$4"
-  {
-    echo "$(basename "$0"): error: ${what}"
-    echo "  why:   ${why}"
-    echo "  where: ${where}"
-    echo "  fix:   ${fix}"
-  } >&2
-}
+if ! command -v git > /dev/null 2>&1; then
+  die 1 "git is not on PATH" \
+    "sync-all could not find the git command" \
+    "sync-all, pre-flight" \
+    "install git for your OS, then run scripts/sync-all again"
+fi
+
+if ! repo_lines="$(read_repos "${POLYREPO_ROOT}/repos.txt")"; then
+  exit 2
+fi
 
 synced=0
 failed=0
 
-while IFS=' ' read -r _url dir; do
-  host="${POLYREPO_ROOT}/${dir}"
-  if [ ! -d "${host}" ]; then
-    report_failure "repository host is missing" \
-      "${host} does not exist" \
-      "sync-all, ${dir}" \
-      "run scripts/provision-all"
-    failed=$((failed + 1))
-    continue
-  fi
+if [ -n "${repo_lines}" ]; then
+  while IFS=' ' read -r _url dir; do
+    host="${POLYREPO_ROOT}/${dir}"
+    if [ ! -d "${host}" ]; then
+      warn "repository host is missing" \
+        "${host} does not exist" \
+        "sync-all, ${dir}" \
+        "run scripts/provision-all"
+      failed=$((failed + 1))
+      continue
+    fi
 
-  branch="$(default_branch "${host}")"
-  if [ -z "${branch}" ]; then
-    report_failure "no default branch" \
-      "origin/HEAD is unset and could not be determined for ${host}" \
-      "sync-all, ${dir}" \
-      "run git -C ${host} remote set-head origin --auto"
-    failed=$((failed + 1))
-    continue
-  fi
+    branch="$(default_branch "${host}")"
+    if [ -z "${branch}" ]; then
+      warn "no default branch" \
+        "origin/HEAD could not be read for ${host}, even after an automatic attempt to set it" \
+        "sync-all, ${dir}" \
+        "confirm ${host} can reach origin (network, SSH key) with git -C ${host} fetch origin, then run git -C ${host} remote set-head origin <branch> by hand and check its output"
+      failed=$((failed + 1))
+      continue
+    fi
 
-  worktree="${host}/${branch}"
-  if [ ! -d "${worktree}" ]; then
-    report_failure "worktree is missing" \
-      "${worktree} does not exist" \
-      "sync-all, ${dir}" \
-      "git -C ${dir} worktree add -B ${branch} ${branch} origin/${branch}"
-    failed=$((failed + 1))
-    continue
-  fi
+    worktree="${host}/${branch}"
+    if [ ! -d "${worktree}" ]; then
+      warn "worktree is missing" \
+        "${worktree} does not exist" \
+        "sync-all, ${dir}" \
+        "git -C ${dir} worktree add -B ${branch} ${branch} origin/${branch}"
+      failed=$((failed + 1))
+      continue
+    fi
 
-  if ! git -C "${worktree}" pull --ff-only > /dev/null 2>&1; then
-    report_failure "fast-forward pull failed" \
-      "git -C ${worktree} pull --ff-only did not succeed; the local and remote branches may have diverged" \
-      "sync-all, ${dir}/${branch}" \
-      "inspect ${worktree} by hand and resolve the divergence"
-    failed=$((failed + 1))
-    continue
-  fi
+    if ! git -C "${worktree}" pull --ff-only > /dev/null 2>&1; then
+      warn "fast-forward pull failed" \
+        "git -C ${worktree} pull --ff-only did not succeed; the local and remote branches may have diverged" \
+        "sync-all, ${dir}/${branch}" \
+        "inspect ${worktree} by hand and resolve the divergence"
+      failed=$((failed + 1))
+      continue
+    fi
 
-  log "synced" "${dir}/${branch}"
-  synced=$((synced + 1))
-done < <(read_repos "${POLYREPO_ROOT}/repos.txt")
+    log "synced" "${dir}/${branch}"
+    synced=$((synced + 1))
+  done <<< "${repo_lines}"
+fi
 
 log "done" "${synced} synced, ${failed} failed"
 

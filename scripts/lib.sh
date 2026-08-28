@@ -4,10 +4,12 @@
 # The entry point scripts source this file. It defines message helpers,
 # the repository list reader, and two git branch helpers.
 
-# die <exit> <what> <why> <where> <fix>
-# Print an actionable error to stderr and exit with the given code.
-die() {
-  local exit_code="$1" what="$2" why="$3" where="$4" fix="$5"
+# warn <what> <why> <where> <fix>
+# Print one actionable error to stderr, in the what/why/where/fix shape.
+# Does not exit. Use this to report a failure that a caller must count
+# and continue past. die (below) uses this same shape and then exits.
+warn() {
+  local what="$1" why="$2" where="$3" fix="$4"
   local script_name
   script_name="$(basename "$0")"
   {
@@ -16,6 +18,13 @@ die() {
     echo "  where: ${where}"
     echo "  fix:   ${fix}"
   } >&2
+}
+
+# die <exit> <what> <why> <where> <fix>
+# Print an actionable error to stderr and exit with the given code.
+die() {
+  local exit_code="$1" what="$2" why="$3" where="$4" fix="$5"
+  warn "${what}" "${why}" "${where}" "${fix}"
   exit "${exit_code}"
 }
 
