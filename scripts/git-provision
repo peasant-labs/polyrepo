@@ -33,11 +33,11 @@ if [ -e "${dir}" ]; then
 fi
 
 log "clone" "${url} -> ${dir}"
-if ! git clone --no-checkout "${url}" "${dir}" > /dev/null 2>&1; then
+if ! git clone --no-checkout "${url}" "${dir}" > /dev/null; then
   die 1 "git clone failed" \
     "git clone --no-checkout could not fetch ${url} into ${dir}" \
     "git-provision, cloning ${url} into ${dir}" \
-    "check the ssh key on GitHub, check the url in repos.txt, check the network"
+    "read the git message above; then check the ssh key on GitHub, the url in repos.txt, or the network"
 fi
 
 if ! (
@@ -49,7 +49,7 @@ if ! (
   } > .gitignore
   git add .gitignore
   git commit -q -m "host: ignore every worktree directory"
-) > /dev/null 2>&1; then
+) > /dev/null; then
   die 1 "orphan host branch setup failed" \
     "git switch --orphan, git add or git commit did not succeed in ${dir}" \
     "git-provision, building the __dummy__ host branch in ${dir}" \
@@ -59,7 +59,7 @@ fi
 found_branch=0
 for b in main develop; do
   if remote_branch_exists "${dir}" "${b}"; then
-    if ! git -C "${dir}" worktree add -B "${b}" "${b}" "origin/${b}" > /dev/null 2>&1; then
+    if ! git -C "${dir}" worktree add -B "${b}" "${b}" "origin/${b}" > /dev/null; then
       die 1 "git worktree add failed" \
         "git worktree add could not create ${dir}/${b} from origin/${b}" \
         "git-provision, adding the ${b} worktree in ${dir}" \

@@ -62,7 +62,7 @@ if [ -n "${repo_lines}" ]; then
       continue
     fi
 
-    if ! git -C "${worktree}" pull --ff-only > /dev/null 2>&1; then
+    if ! git -C "${worktree}" pull --ff-only > /dev/null; then
       warn "fast-forward pull failed" \
         "git -C ${worktree} pull --ff-only did not succeed; the local and remote branches may have diverged" \
         "sync-all, ${dir}/${branch}" \
