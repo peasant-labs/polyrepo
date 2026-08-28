@@ -33,16 +33,16 @@ if [ -e "${dir}" ]; then
 fi
 
 log "clone" "${url} -> ${dir}"
-if ! git clone --no-checkout "${url}" "${dir}" > /dev/null; then
+if ! git clone -q --no-checkout "${url}" "${dir}" > /dev/null; then
   die 1 "git clone failed" \
     "git clone --no-checkout could not fetch ${url} into ${dir}" \
     "git-provision, cloning ${url} into ${dir}" \
-    "read the git message above; then check the ssh key on GitHub, the url in repos.txt, or the network"
+    "read the git message above; then check the ssh key on GitHub, the url, or the network"
 fi
 
 if ! (
   cd "${dir}"
-  git switch --orphan __dummy__
+  git switch -q --orphan __dummy__
   {
     echo "**/"
     echo "*/"

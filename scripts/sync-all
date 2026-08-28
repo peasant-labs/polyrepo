@@ -57,7 +57,7 @@ if [ -n "${repo_lines}" ]; then
       warn "worktree is missing" \
         "${worktree} does not exist" \
         "sync-all, ${dir}" \
-        "git -C ${dir} worktree add -B ${branch} ${branch} origin/${branch}"
+        "git -C ${host} worktree add -B ${branch} ${branch} origin/${branch}"
       failed=$((failed + 1))
       continue
     fi
