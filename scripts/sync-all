@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# sync-all
+#
+# Fast-forward the main/develop worktree of every provisioned repository.
+# Takes no arguments.
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=scripts/lib.sh
+source "${SCRIPT_DIR}/lib.sh"
+
+if [ "$#" -ne 0 ]; then
+  echo "usage: $(basename "$0")" >&2
+  exit 2
+fi
+
+POLYREPO_ROOT="${POLYREPO_ROOT:-$(dirname "${SCRIPT_DIR}")}"
+
+# report_failure <what> <why> <where> <fix>
+# Print one failure to stderr, in the same shape as die, without exiting.
+report_failure() {
+  local what="$1" why="$2" where="$3" fix="$4"
+  {
+    echo "$(basename "$0"): error: ${what}"
+    echo "  why:   ${why}"
+    echo "  where: ${where}"
+    echo "  fix:   ${fix}"
+  } >&2
+}
+
+synced=0
+failed=0
+
+while IFS=' ' read -r _url dir; do
+  host="${POLYREPO_ROOT}/${dir}"
+  if [ ! -d "${host}" ]; then
+    report_failure "repository host is missing" \
+      "${host} does not exist" \
+      "sync-all, ${dir}" \
+      "run scripts/provision-all"
+    failed=$((failed + 1))
+    continue
+  fi
+
+  branch="$(default_branch "${host}")"
+  if [ -z "${branch}" ]; then
+    report_failure "no default branch" \
+      "origin/HEAD is unset and could not be determined for ${host}" \
+      "sync-all, ${dir}" \
+      "run git -C ${host} remote set-head origin --auto"
+    failed=$((failed + 1))
+    continue
+  fi
+
+  worktree="${host}/${branch}"
+  if [ ! -d "${worktree}" ]; then
+    report_failure "worktree is missing" \
+      "${worktree} does not exist" \
+      "sync-all, ${dir}" \
+      "git -C ${dir} worktree add -B ${branch} ${branch} origin/${branch}"
+    failed=$((failed + 1))
+    continue
+  fi
+
+  if ! git -C "${worktree}" pull --ff-only > /dev/null 2>&1; then
+    report_failure "fast-forward pull failed" \
+      "git -C ${worktree} pull --ff-only did not succeed; the local and remote branches may have diverged" \
+      "sync-all, ${dir}/${branch}" \
+      "inspect ${worktree} by hand and resolve the divergence"
+    failed=$((failed + 1))
+    continue
+  fi
+
+  log "synced" "${dir}/${branch}"
+  synced=$((synced + 1))
+done < <(read_repos "${POLYREPO_ROOT}/repos.txt")
+
+log "done" "${synced} synced, ${failed} failed"
+
+if [ "${failed}" -gt 0 ]; then
+  exit 1
+fi

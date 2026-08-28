@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# git-provision <url> <dir>
+#
+# Make a worktree host for one repository. The host holds an orphan
+# __dummy__ branch, plus one worktree per available default/release
+# branch (main, develop).
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=scripts/lib.sh
+source "${SCRIPT_DIR}/lib.sh"
+
+if [ "$#" -ne 2 ]; then
+  echo "usage: $(basename "$0") <url> <dir>" >&2
+  exit 2
+fi
+
+url="$1"
+dir="$2"
+
+if ! git var GIT_COMMITTER_IDENT > /dev/null 2>&1; then
+  die 1 "no git author identity" \
+    "git var GIT_COMMITTER_IDENT failed; the git config and the environment hold no usable name and email" \
+    "git-provision, pre-flight, before cloning ${url}" \
+    "run git config --global user.name '<name>' and git config --global user.email '<email>'"
+fi
+
+if [ -e "${dir}" ]; then
+  die 1 "target directory already exists" \
+    "${dir} is already present, so git-provision will not overwrite it" \
+    "git-provision, before cloning ${url} into ${dir}" \
+    "remove or rename ${dir}, or choose a different dir in repos.txt"
+fi
+
+log "clone" "${url} -> ${dir}"
+git clone --no-checkout "${url}" "${dir}"
+
+(
+  cd "${dir}"
+  git switch --orphan __dummy__
+  {
+    echo "**/"
+    echo "*/"
+  } > .gitignore
+  git add .gitignore
+  git commit -q -m "host: ignore every worktree directory"
+)
+
+found_branch=0
+for b in main develop; do
+  if git -C "${dir}" rev-parse --verify -q "refs/remotes/origin/${b}" > /dev/null 2>&1; then
+    git -C "${dir}" worktree add -B "${b}" "${b}" "origin/${b}"
+    log "worktree" "${dir}/${b} added from origin/${b}"
+    found_branch=1
+  else
+    log "skip" "${dir}: no origin/${b}"
+  fi
+done
+
+if [ "${found_branch}" -eq 0 ]; then
+  die 1 "no known branch found" \
+    "neither origin/main nor origin/develop exists in ${dir}" \
+    "git-provision, branch loop, after cloning ${url} into ${dir}" \
+    "inspect ${dir} by hand; the host is left in place for review"
+fi
