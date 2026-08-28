@@ -1,0 +1,8 @@
+# fixture-repos.txt - bare fixture repositories built by setup_fixtures.
+#
+# Fields: <name> <branches, comma separated, or -> <head branch, or ->
+# A branches value of - builds a bare repo with no branches at all
+# (git init --bare, nothing else).
+both main,develop develop
+mainonly main main
+empty - -
