@@ -20,7 +20,7 @@ dir="$2"
 
 if ! git var GIT_COMMITTER_IDENT > /dev/null 2>&1; then
   die 1 "no git author identity" \
-    "git var GIT_COMMITTER_IDENT failed; the git config and the environment hold no usable name and email" \
+    "git var GIT_COMMITTER_IDENT failed. The git config and the environment hold no usable name and email" \
     "git-provision, pre-flight, before cloning ${url}" \
     "run git config --global user.name '<name>' and git config --global user.email '<email>'"
 fi
@@ -37,7 +37,7 @@ if ! git clone -q --no-checkout "${url}" "${dir}" > /dev/null; then
   die 1 "git clone failed" \
     "git clone --no-checkout could not fetch ${url} into ${dir}" \
     "git-provision, cloning ${url} into ${dir}" \
-    "read the git message above; then check the ssh key on GitHub, the url, or the network"
+    "read the git message above. Then check the url, your ssh key on the git host, or the network"
 fi
 
 if ! (
@@ -53,7 +53,7 @@ if ! (
   die 1 "orphan host branch setup failed" \
     "git switch --orphan, git add or git commit did not succeed in ${dir}" \
     "git-provision, building the __dummy__ host branch in ${dir}" \
-    "inspect ${dir} by hand; the partial clone is left in place for review"
+    "inspect ${dir} by hand. The partial clone is left in place for review"
 fi
 
 found_branch=0
@@ -63,7 +63,7 @@ for b in main develop; do
       die 1 "git worktree add failed" \
         "git worktree add could not create ${dir}/${b} from origin/${b}" \
         "git-provision, adding the ${b} worktree in ${dir}" \
-        "inspect ${dir} by hand; the host and any earlier worktrees are left in place for review"
+        "inspect ${dir} by hand. The host and any earlier worktrees are left in place for review"
     fi
     log "worktree" "${dir}/${b} added from origin/${b}"
     found_branch=1
@@ -76,5 +76,5 @@ if [ "${found_branch}" -eq 0 ]; then
   die 1 "no known branch found" \
     "neither origin/main nor origin/develop exists in ${dir}" \
     "git-provision, branch loop, after cloning ${url} into ${dir}" \
-    "inspect ${dir} by hand; the host is left in place for review"
+    "inspect ${dir} by hand. The host is left in place for review"
 fi

@@ -16,8 +16,9 @@ peasant-labs repositories. It does not hold any product code.
 2. Run `direnv allow` in the repository root. This enters the dev shell.
 3. Run `scripts/provision-all`. This clones each repository named in
    `repos.txt` and sets up its worktrees.
-4. Run `scripts/sync-all`. This fast-forwards each worktree to the
-   current remote state.
+4. Run `scripts/sync-all`. This fast-forwards the default-branch
+   worktree of each repository (`develop` or `main`, as set on the
+   remote). Other worktrees are not touched.
 
 ## Repository host layout
 
@@ -40,8 +41,9 @@ sibling checkout to build.
 
 ## Daily use
 
-Run `scripts/sync-all` to bring every worktree up to date with its
-remote.
+Run `scripts/sync-all` to bring the default-branch worktree of every
+repository up to date with its remote. Update a feature worktree by
+hand with `git pull` inside it.
 
 ## Add a repository
 

@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # sync-all
 #
-# Fast-forward the main/develop worktree of every provisioned repository.
+# Fast-forward the default-branch worktree of every provisioned
+# repository. The default branch is the one origin/HEAD names. Other
+# worktrees are not touched.
 # Takes no arguments.
 set -euo pipefail
 
@@ -64,7 +66,7 @@ if [ -n "${repo_lines}" ]; then
 
     if ! git -C "${worktree}" pull --ff-only > /dev/null; then
       warn "fast-forward pull failed" \
-        "git -C ${worktree} pull --ff-only did not succeed; the local and remote branches may have diverged" \
+        "git -C ${worktree} pull --ff-only did not succeed. The local and remote branches may have diverged" \
         "sync-all, ${dir}/${branch}" \
         "inspect ${worktree} by hand and resolve the divergence"
       failed=$((failed + 1))
