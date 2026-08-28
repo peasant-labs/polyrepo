@@ -16,6 +16,32 @@ git clone git@github.com:peasant-labs/polyrepo.git \
   && scripts/provision-all
 ```
 
+## Toolchain
+
+The scripts above need only git. To build and test the repositories you
+need these tools. Install them natively, or take all of them from the
+optional dev shell in the next section.
+
+| tool | version | install |
+|---|---|---|
+| Go | 1.26 (the modules require at least 1.25) | https://go.dev/dl/ or your package manager |
+| Node | 24 (26 also works) | https://nodejs.org/ or a version manager such as `fnm` or `nvm` |
+| pnpm | per repository, pinned in `package.json` | `corepack enable` (ships with Node) |
+
+Each JavaScript repository pins its own pnpm version in the
+`packageManager` field of `package.json`. Corepack reads that field and
+runs the correct pnpm version for you. Do not install pnpm globally.
+
+```sh
+corepack enable
+```
+
+Check your tools:
+
+```sh
+go version && node --version && pnpm --version
+```
+
 ## Optional: the dev shell
 
 `flake.nix` gives one dev shell with the toolchain for every repository
