@@ -1,2 +1,6 @@
-**/
-*/
+# Ignore every top-level directory: those are the cloned repositories.
+# The directories this repository owns are listed as exceptions.
+/*/
+!/scripts/
+!/tests/
+!/.github/
