@@ -25,15 +25,16 @@ optional dev shell in the next section.
 | tool | version | install |
 |---|---|---|
 | Go | 1.26 (the modules require at least 1.25) | https://go.dev/dl/ or your package manager |
-| Node | 24 (26 also works) | https://nodejs.org/ or a version manager such as `fnm` or `nvm` |
-| pnpm | per repository, pinned in `package.json` | `corepack enable` (ships with Node) |
+| Node | 26 | https://nodejs.org/ or a version manager such as `fnm` or `nvm` |
+| pnpm | per repository, pinned in `package.json` | `npm install -g pnpm@<version pinned in the repository package.json>` |
 
-Each JavaScript repository pins its own pnpm version in the
-`packageManager` field of `package.json`. Corepack reads that field and
-runs the correct pnpm version for you. Do not install pnpm globally.
+Each JavaScript repository pins its pnpm version in the
+`packageManager` field of `package.json`. Install that exact version
+with `npm install -g pnpm@<version>`. Corepack is optional on Node 25
+and later. If you use corepack, install it first, then enable it:
 
 ```sh
-corepack enable
+npm install -g corepack && corepack enable
 ```
 
 Check your tools:
