@@ -1,0 +1,8 @@
+# provision-cases.txt - cases for tests/git-provision.bats.
+#
+# Fields: <name> <fixture> <worktrees, comma separated, or -> <expect-exit>
+both both main,develop 0
+mainonly mainonly main 0
+nobranch empty - 1
+existing both - 1
+wrongargs - - 2

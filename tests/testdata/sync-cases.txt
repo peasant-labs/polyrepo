@@ -1,0 +1,12 @@
+# sync-cases.txt - required case names for tests/sync-all.bats.
+#
+# This file is a deletion-protection manifest: require_case_names checks
+# that each name here still has a matching @test in the bats file. It
+# does not drive a generic loop, because each case needs its own
+# repos.txt and its own pre-state.
+ff
+uptodate
+hostmissing
+worktreemissing
+badline
+args
