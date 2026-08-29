@@ -1,6 +1,8 @@
-# Ignore every top-level directory: those are the cloned repositories.
-# The directories this repository owns are listed as exceptions.
-/*/
-!/scripts/
-!/tests/
-!/.github/
+# The cloned repositories. One line per dir in repos.txt.
+# tests/gitignore.bats checks that every dir in repos.txt is listed here.
+/peasant/
+/village/
+/schema/
+/fairtrade-design-system/
+/redact/
+/website/
