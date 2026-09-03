@@ -1,0 +1,16 @@
+# doctor-cases.txt - required case names for tests/doctor.bats.
+#
+# This file is a deletion-protection manifest: require_case_names checks
+# that each name here still has a matching @test in the bats file. It
+# does not drive a generic loop, because each case needs its own stub
+# bin directory.
+args
+git-missing
+native-good
+go-missing
+go-old
+node-wrong
+pnpm-wrong
+devshell-good
+devshell-no-direnv
+devshell-unwired

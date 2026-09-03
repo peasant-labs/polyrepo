@@ -1,0 +1,192 @@
+#!/usr/bin/env bash
+# doctor
+#
+# Pre-flight check for the developer toolchain, in the flutter doctor
+# style: one verdict line per component, [✓] with the found version on
+# a pass and [✗] with the problem on a fail, and the why, where, and
+# fix fields indented under a failing line. Checks git, then one tool
+# path: the native trio (go, node, pnpm) when nix is absent, or the
+# dev-shell trio (nix, direnv, nix-direnv) when nix is present. Exits
+# 1 when any check fails.
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=scripts/lib.sh
+source "${SCRIPT_DIR}/lib.sh"
+
+if [ "$#" -ne 0 ]; then
+  echo "usage: $(basename "$0")" >&2
+  exit 2
+fi
+
+# README section titles, for the fix lines.
+NATIVE_SECTION="External contributors: install the tools on your OS"
+DEVSHELL_SECTION="Core team: the dev shell"
+
+checks=0
+failed=0
+
+# record <ok> <summary> [why where fix]
+# Count one check and print its verdict line: [✓] with the summary on
+# a pass, [✗] with the summary on a fail. On a fail, print the why,
+# where, and fix fields indented under the verdict line, in the
+# what/why/where/fix shape from lib.sh. The summary carries the what.
+record() {
+  checks=$((checks + 1))
+  if [ "$1" = "yes" ]; then
+    echo "[✓] ${2}"
+    return 0
+  fi
+  failed=$((failed + 1))
+  echo "[✗] ${2}"
+  shift 2
+  {
+    echo "  why:   ${1}"
+    echo "  where: ${2}"
+    echo "  fix:   ${3}"
+  } >&2
+}
+
+# nix_direnv_wired
+# True when a file in the direnv user config mentions nix-direnv, so
+# direnv loads it. Covers the lib/ symlink, a direnvrc source line,
+# and home-manager setups alike.
+nix_direnv_wired() {
+  local config_dir="${HOME}/.config/direnv"
+  local file content
+  for file in "${config_dir}/direnvrc" "${config_dir}/lib"/*; do
+    if [ -f "${file}" ]; then
+      content="$(< "${file}")"
+      case "${content}" in
+        *nix[-_]direnv*)
+          return 0
+          ;;
+      esac
+    fi
+  done
+  return 1
+}
+
+if command -v git > /dev/null 2>&1; then
+  git_v="$(git --version)"
+  record yes "Git (${git_v#git version })"
+else
+  record no "git is not on PATH" \
+    "doctor could not find the git command" \
+    "doctor, pre-flight" \
+    "install git for your OS, then run scripts/doctor again"
+fi
+
+# Path choice: nix on PATH selects the dev-shell path. Otherwise the
+# native path serves an external contributor.
+if command -v nix > /dev/null 2>&1; then
+  path="dev-shell"
+else
+  path="native"
+fi
+log "path" "${path}"
+
+if [ "${path}" = "native" ]; then
+  if command -v go > /dev/null 2>&1; then
+    go_output="$(go version)"
+    go_v="unknown"
+    for token in ${go_output}; do
+      case "${token}" in
+        go1.*) go_v="${token#go}"; break ;;
+      esac
+    done
+    case "${go_v}" in
+      1.*)
+        go_major="${go_v%%.*}"
+        go_minor="${go_v#*.}"
+        go_minor="${go_minor%%.*}"
+        if [ "$((go_major * 100 + go_minor))" -ge 125 ]; then
+          record yes "Go (${go_v})"
+        else
+          record no "go ${go_v} is too old" \
+            "the modules require at least go 1.25" \
+            "doctor, native path" \
+            "install go 1.26 from https://go.dev/dl/, or run: brew install go; see README section '${NATIVE_SECTION}'"
+        fi
+        ;;
+      *)
+        record no "could not read the go version" \
+          "go version printed an unexpected format" \
+          "doctor, native path" \
+          "run: go version, and fix the go install if the output looks wrong"
+        ;;
+    esac
+  else
+    record no "go is not on PATH" \
+      "doctor could not find the go command" \
+      "doctor, native path" \
+      "install go 1.26 from https://go.dev/dl/, or run: brew install go; see README section '${NATIVE_SECTION}'"
+  fi
+
+  if command -v node > /dev/null 2>&1; then
+    node_v="$(node --version)"
+    node_major="${node_v#v}"
+    node_major="${node_major%%.*}"
+    if [ "${node_major}" -eq 26 ]; then
+      record yes "Node (${node_v})"
+    else
+      record no "node ${node_v} is not node 26" \
+        "the frontends pin node 26" \
+        "doctor, native path" \
+        "install node 26 with fnm or nvm, or run: brew install node; see README section '${NATIVE_SECTION}'"
+    fi
+  else
+    record no "node is not on PATH" \
+      "doctor could not find the node command" \
+      "doctor, native path" \
+      "install node 26 with fnm or nvm, or run: brew install node; see README section '${NATIVE_SECTION}'"
+  fi
+
+  if command -v pnpm > /dev/null 2>&1; then
+    pnpm_v="$(pnpm --version)"
+    if [ "${pnpm_v}" = "11.24.0" ]; then
+      record yes "pnpm (${pnpm_v})"
+    else
+      record no "pnpm ${pnpm_v} is not 11.24.0" \
+        "the version must match the packageManager pin" \
+        "doctor, native path" \
+        "run: npm install -g pnpm@11.24.0; see README section '${NATIVE_SECTION}'"
+    fi
+  else
+    record no "pnpm is not on PATH" \
+      "doctor could not find the pnpm command" \
+      "doctor, native path" \
+      "run: npm install -g pnpm@11.24.0; see README section '${NATIVE_SECTION}'"
+  fi
+fi
+
+if [ "${path}" = "dev-shell" ]; then
+  # nix is present, which is why this path was chosen.
+  nix_v="$(nix --version)"
+  record yes "Nix (${nix_v##* })"
+
+  if command -v direnv > /dev/null 2>&1; then
+    direnv_v="$(direnv version)"
+    record yes "direnv (${direnv_v})"
+  else
+    record no "direnv is not on PATH" \
+      "doctor could not find the direnv command" \
+      "doctor, dev-shell path" \
+      "run: nix profile install nixpkgs#direnv; see README section '${DEVSHELL_SECTION}'"
+  fi
+
+  if nix_direnv_wired; then
+    record yes "nix-direnv (wired)"
+  else
+    record no "nix-direnv is not wired into direnv" \
+      "direnv has no nix-direnv file in its user config, so dev-shell entry stays uncached" \
+      "doctor, dev-shell path" \
+      "run: nix profile install nixpkgs#nix-direnv, then: mkdir -p ~/.config/direnv/lib && ln -s ~/.nix-profile/share/nix-direnv/direnvrc ~/.config/direnv/lib/nix-direnv.sh; see README section '${DEVSHELL_SECTION}'"
+  fi
+fi
+
+if [ "${failed}" -gt 0 ]; then
+  log "done" "${failed} of ${checks} checks failed"
+  exit 1
+fi
+log "ok" "all ${checks} checks passed"

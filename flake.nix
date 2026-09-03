@@ -40,6 +40,7 @@
           golangci-lint
           actionlint
           shellcheck
+          bats # test runner for tests/*.bats
           vacuum-go
           charm-freeze
           pnpm

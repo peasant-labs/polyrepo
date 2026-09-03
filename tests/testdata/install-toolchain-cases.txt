@@ -1,0 +1,7 @@
+# install-toolchain-cases.txt - required case names for the installer tests.
+#
+# This deletion-protection manifest names each required test. It does not
+# drive a loop because each case needs a different machine state.
+args
+unsupported-os
+noninteractive-refusal
