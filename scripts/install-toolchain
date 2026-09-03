@@ -1,0 +1,229 @@
+#!/usr/bin/env bash
+#
+# Install the native polyrepo toolchain for external contributors.
+#
+# The script shows its plan and asks before it changes anything. It installs
+# into the user's home directory. It never uses sudo and never edits a shell
+# profile. A truncated piped download cannot run because main is last.
+#
+#   POLYREPO_YES=1             install without the prompt
+#   POLYREPO_GO_VERSION=1.26.3 install one specific Go 1.26 patch
+
+set -euo pipefail
+
+GO_SERIES="1.26"
+NODE_VERSION="26"
+PNPM_VERSION="11.24.0"
+WORK_DIR=""
+
+say() { printf '%s\n' "$*"; }
+err() { printf '%s\n' "$*" >&2; }
+
+need() {
+  command -v "$1" >/dev/null 2>&1 || {
+    err "install-toolchain: $1 is required but was not found on PATH"
+    exit 1
+  }
+}
+
+detect_os() {
+  case "$(uname -s)" in
+    Linux) printf 'linux' ;;
+    Darwin) printf 'darwin' ;;
+    *)
+      err "install-toolchain: unsupported operating system: $(uname -s)"
+      err "the native installer supports Linux and macOS"
+      exit 1
+      ;;
+  esac
+}
+
+detect_arch() {
+  case "$(uname -m)" in
+    x86_64 | amd64) printf 'amd64' ;;
+    aarch64 | arm64) printf 'arm64' ;;
+    *)
+      err "install-toolchain: unsupported architecture: $(uname -m)"
+      err "the native installer supports amd64 and arm64"
+      exit 1
+      ;;
+  esac
+}
+
+latest_go_version() {
+  local metadata="$1" versions
+  versions="$(
+    printf '%s\n' "$metadata" |
+      sed -n -E "s/.*\"version\": \"go(${GO_SERIES//./\\.}\\.[0-9]+)\".*/\1/p"
+  )"
+  [ -n "$versions" ] || return 1
+  printf '%s\n' "${versions%%$'\n'*}"
+}
+
+go_archive_sha256() {
+  local metadata="$1" asset="$2"
+  printf '%s\n' "$metadata" | awk -v asset="$asset" '
+    $0 ~ "\"filename\": \"" asset "\"" { in_file = 1; next }
+    in_file && !printed && /"sha256":/ {
+      sub(/^.*"sha256": "/, "")
+      sub(/".*$/, "")
+      print
+      printed = 1
+    }
+  '
+}
+
+show_plan() {
+  local go_version="$1" os="$2" arch="$3"
+  say ""
+  say "  polyrepo native toolchain"
+  say ""
+  say "  machine        ${os}/${arch}"
+  say "  Go             ${go_version} -> ${HOME}/go/${go_version}"
+  say "  Node           ${NODE_VERSION} -> fnm user install"
+  say "  pnpm           ${PNPM_VERSION} -> active Node ${NODE_VERSION}"
+  say "  profiles       no files will be edited"
+  say "  privileges     sudo will not be used"
+  say ""
+}
+
+confirm() {
+  if [ "${POLYREPO_YES:-}" = "1" ]; then
+    say "  continuing without asking (POLYREPO_YES=1)"
+    say ""
+    return 0
+  fi
+  if [ ! -t 1 ] || [ ! -r /dev/tty ]; then
+    err "  no terminal is available for confirmation, so nothing changed."
+    err "  re-run with POLYREPO_YES=1 to install without the prompt."
+    exit 1
+  fi
+  local reply=""
+  printf '  continue? [y/N] '
+  read -r reply < /dev/tty || true
+  say ""
+  case "$reply" in
+    y | Y | yes | YES) return 0 ;;
+    *) say "  nothing changed."; exit 0 ;;
+  esac
+}
+
+verify_go_archive() {
+  local archive="$1" want="$2" got
+  if command -v sha256sum >/dev/null 2>&1; then
+    got="$(sha256sum "$archive" | awk '{ print $1 }')"
+  elif command -v shasum >/dev/null 2>&1; then
+    got="$(shasum -a 256 "$archive" | awk '{ print $1 }')"
+  else
+    err "install-toolchain: sha256sum or shasum is required"
+    exit 1
+  fi
+  [ "$want" = "$got" ] || {
+    err "install-toolchain: Go archive checksum mismatch"
+    err "  expected ${want}"
+    err "  got      ${got}"
+    exit 1
+  }
+}
+
+install_go() {
+  local version="$1" os="$2" arch="$3" want="$4"
+  local asset="go${version}.${os}-${arch}.tar.gz"
+  local url="https://go.dev/dl/${asset}"
+  local archive="${WORK_DIR}/${asset}"
+  local dest="${HOME}/go/${version}"
+
+  if [ -x "${dest}/bin/go" ]; then
+    say "  Go ${version} already exists at ${dest}; keeping it."
+    return 0
+  fi
+  say "  downloading Go ${version}..."
+  curl -fsSL "$url" -o "$archive"
+  verify_go_archive "$archive" "$want"
+  tar -xzf "$archive" -C "$WORK_DIR"
+  [ -x "${WORK_DIR}/go/bin/go" ] || {
+    err "install-toolchain: the Go archive did not contain bin/go"
+    exit 1
+  }
+  mkdir -p "${HOME}/go"
+  mv "${WORK_DIR}/go" "$dest"
+}
+
+install_node_and_pnpm() {
+  local fnm_bin="${HOME}/.local/share/fnm/fnm"
+  if [ ! -x "$fnm_bin" ]; then
+    say "  installing fnm..."
+    curl -fsSL https://fnm.vercel.app/install -o "${WORK_DIR}/fnm-install"
+    bash "${WORK_DIR}/fnm-install" --skip-shell
+  fi
+  [ -x "$fnm_bin" ] || {
+    err "install-toolchain: fnm did not install at ${fnm_bin}"
+    exit 1
+  }
+  eval "$("$fnm_bin" env --shell bash)"
+  say "  installing Node ${NODE_VERSION}..."
+  "$fnm_bin" install "$NODE_VERSION"
+  "$fnm_bin" use "$NODE_VERSION"
+  say "  installing pnpm ${PNPM_VERSION}..."
+  npm install -g "pnpm@${PNPM_VERSION}"
+}
+
+show_result() {
+  local version="$1"
+  say ""
+  say "  done. Add these lines to your shell configuration:"
+  say ""
+  say "    export PATH=\"\$HOME/go/${version}/bin:\$PATH\""
+  # Print the command literally for the user to put in a profile.
+  # shellcheck disable=SC2016
+  say '    eval "$(fnm env --use-on-cd --shell bash)"'
+  say ""
+  say "  Then open a new shell and run: scripts/doctor"
+  say ""
+}
+
+main() {
+  if [ "$#" -ne 0 ]; then
+    err "usage: $(basename "$0")"
+    exit 2
+  fi
+  need curl
+  need tar
+  need uname
+  need sed
+  need awk
+  need bash
+
+  local os arch go_version go_metadata go_sha256 go_asset
+  os="$(detect_os)"
+  arch="$(detect_arch)"
+  go_metadata="$(curl -fsSL 'https://go.dev/dl/?mode=json&include=all')"
+  if [ -n "${POLYREPO_GO_VERSION:-}" ]; then
+    go_version="$POLYREPO_GO_VERSION"
+  else
+    go_version="$(latest_go_version "$go_metadata" || true)"
+  fi
+  case "$go_version" in
+    "${GO_SERIES}."[0-9]*) ;;
+    *)
+      err "install-toolchain: could not find a Go ${GO_SERIES} patch release"
+      exit 1
+      ;;
+  esac
+  go_asset="go${go_version}.${os}-${arch}.tar.gz"
+  go_sha256="$(go_archive_sha256 "$go_metadata" "$go_asset")"
+  [ -n "$go_sha256" ] || {
+    err "install-toolchain: go.dev/dl does not list ${go_asset}"
+    exit 1
+  }
+
+  show_plan "$go_version" "$os" "$arch"
+  confirm
+  WORK_DIR="$(mktemp -d)"
+  trap 'rm -rf "${WORK_DIR:-}"' EXIT
+  install_go "$go_version" "$os" "$arch" "$go_sha256"
+  install_node_and_pnpm
+  show_result "$go_version"
+}
+
+main "$@"
