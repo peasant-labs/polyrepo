@@ -102,6 +102,10 @@ worktrees are not touched; update a feature worktree by hand with
 `git pull` inside it. A fresh provision is already current, so there is
 no need to run this right after `scripts/provision-all`.
 
+Run `scripts/doctor` to check that your machine holds the tools for one
+of the two paths: git plus the native toolchain (go, node, pnpm), or
+git plus the Nix trio (nix, direnv, nix-direnv).
+
 ## Add a repository
 
 1. Add a line to `repos.txt`: `<url> <dir>`.
