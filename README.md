@@ -43,6 +43,39 @@ Check your tools:
 go version && node --version && pnpm --version
 ```
 
+## External contributors: install the tools on your OS
+
+You do not need Nix for this path. (The core team uses the dev shell
+instead; see the next section.)
+
+macOS, with Homebrew:
+
+```sh
+brew install go node
+npm install -g pnpm@11.24.0
+```
+
+Linux:
+
+```sh
+# Distro Go packages lag one or two majors behind and get security
+# fixes only. Use the official tarball from https://go.dev/dl/ instead.
+sudo rm -rf /usr/local/go
+sudo tar -C /usr/local -xzf go1.26.0.linux-amd64.tar.gz # linux-arm64 on ARM
+export PATH="$PATH:/usr/local/go/bin"
+
+# Node 26 through fnm (nvm works the same way).
+curl -fsSL https://fnm.vercel.app/install | bash
+fnm install 26
+
+npm install -g pnpm@11.24.0
+```
+
+Any system Go 1.21 or newer also works: with the default
+`GOTOOLCHAIN=auto`, the go command downloads the toolchain that
+`go.mod` requires on the first build. (Debian 12 ships Go 1.19, which
+cannot bootstrap this. Use the tarball there.)
+
 ## Optional: the dev shell
 
 `flake.nix` gives one dev shell with the toolchain for every repository
