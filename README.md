@@ -3,6 +3,26 @@
 This repository holds the tools that a developer uses to check out the
 peasant-labs repositories. It does not hold any product code.
 
+## What the peasant-labs system does
+
+AI coding tools record useful work in separate local formats. Peasant-labs
+turns those private records into transcripts that a developer can review,
+connect to Git history, redact, and choose to share.
+
+1. OpenCode, Claude Code, and Cursor write sessions to their local stores.
+2. Peasant reads those stores, indexes the sessions, and connects them to
+   repositories and commits on the developer's machine.
+3. The developer reviews the transcript and applies the shared redaction
+   rules before giving explicit consent to publish it.
+4. Village validates the shared contract, stores the published copy, and
+   enforces its access, licensing, and governance rules.
+5. Readers browse the transcripts that Village allows them to discover.
+
+Peasant keeps local work local until the developer starts the `/share`
+flow. Publication is never automatic. See
+[`docs/architecture.md`](docs/architecture.md) for the system landscape,
+runtime containers, shared libraries, and release pipelines.
+
 ## Quick start
 
 You need git and an SSH key that is registered on GitHub. Nothing else.
@@ -19,8 +39,8 @@ git clone git@github.com:peasant-labs/polyrepo.git \
 ## Toolchain
 
 The scripts above need only git. To build and test the repositories you
-need these tools. Install them natively, or take all of them from the
-optional dev shell in the next section.
+need these tools. The core team should use the recommended Nix dev shell
+in the next section. External contributors can install the tools natively.
 
 | tool | version | install |
 |---|---|---|
@@ -37,16 +57,66 @@ install it first, then enable it:
 npm install -g corepack && corepack enable
 ```
 
-Check your tools:
+After you complete either setup path, run the doctor:
+
+```sh
+scripts/doctor
+```
+
+It reports each component with a checkmark or error, shows the detected
+version, and prints an actionable fix for every failure. You can also
+check the native tool versions directly:
 
 ```sh
 go version && node --version && pnpm --version
 ```
 
+## Core team: the recommended dev shell
+
+This is the recommended path for the core team. `flake.nix` gives one
+dev shell with the toolchain for every
+repository (Go, Node, pnpm, linters, cloud CLIs). You do not need it to
+clone or sync. To use it, install Nix and direnv, then trust `.envrc`.
+home-manager is not expected. Open a new shell after each block.
+
+```sh
+# The Determinate installer sets up multi-user Nix.
+curl -fsSL https://install.determinate.systems/nix | sh -s -- install
+```
+
+```sh
+# direnv loads and unloads the environment that .envrc defines.
+# nix-direnv caches the dev shell and keeps it safe from garbage
+# collection. These two are the only profile installs you need.
+nix profile install nixpkgs#direnv
+nix profile install nixpkgs#nix-direnv
+
+# Wire nix-direnv into direnv: direnv auto-loads every file in lib/.
+mkdir -p ~/.config/direnv/lib
+ln -s ~/.nix-profile/share/nix-direnv/direnvrc ~/.config/direnv/lib/nix-direnv.sh
+```
+
+```sh
+# Hook direnv into your shell so it loads .envrc on every directory
+# change. Add the line for your shell, or both.
+echo 'eval "$(direnv hook zsh)"'  >> ~/.zshrc
+echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
+```
+
+```sh
+cd polyrepo && direnv allow
+```
+
+After this, `cd polyrepo` enters the dev shell by itself, and
+nix-direnv caches the entry.
+
+macOS ships bash 3.2, too old for nix-direnv, which needs bash 4.4 or
+newer. Installing direnv through Nix or Homebrew works around this.
+
 ## External contributors: install the tools on your OS
 
 You do not need Nix for this path. (The core team uses the dev shell
-instead; see the next section.) Run the installer from the polyrepo
+instead; see the section above.) Run the installer from the polyrepo
 checkout on macOS or Linux:
 
 ```sh
@@ -102,48 +172,6 @@ eval "$("$FNM_BIN" env --shell bash)"
 npm install -g pnpm@11.24.0
 ```
 
-## Core team: the dev shell
-
-The core team does not install the tools natively (see the section
-above). `flake.nix` gives one dev shell with the toolchain for every
-repository (Go, Node, pnpm, linters, cloud CLIs). You do not need it to
-clone or sync. To use it, install Nix and direnv, then trust `.envrc`.
-home-manager is not expected. Open a new shell after each block.
-
-```sh
-# The Determinate installer sets up multi-user Nix.
-curl -fsSL https://install.determinate.systems/nix | sh -s -- install
-```
-
-```sh
-# direnv loads and unloads the environment that .envrc defines.
-# nix-direnv caches the dev shell and keeps it safe from garbage
-# collection. These two are the only profile installs you need.
-nix profile install nixpkgs#direnv
-nix profile install nixpkgs#nix-direnv
-
-# Wire nix-direnv into direnv: direnv auto-loads every file in lib/.
-mkdir -p ~/.config/direnv/lib
-ln -s ~/.nix-profile/share/nix-direnv/direnvrc ~/.config/direnv/lib/nix-direnv.sh
-```
-
-```sh
-# Hook direnv into your shell so it loads .envrc on every directory
-# change. Add the line for your shell, or both.
-echo 'eval "$(direnv hook zsh)"'  >> ~/.zshrc
-echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
-```
-
-```sh
-cd polyrepo && direnv allow
-```
-
-After this, `cd polyrepo` enters the dev shell by itself, and
-nix-direnv caches the entry.
-
-macOS ships bash 3.2, too old for nix-direnv, which needs bash 4.4 or
-newer. Installing direnv through Nix or Homebrew works around this.
-
 ## What the steps do
 
 1. `git clone` gets this repository.
@@ -172,6 +200,41 @@ Each repository builds and tests on its own. No repository needs a
 sibling checkout to build.
 
 ## Architecture and contribution map
+
+```c4
+System Landscape diagram: peasant-labs
+
++-----------------------------+                                  +-----------------------------+
+| developer                   |                                  | reader                      |
+| [Person]                    |                                  | [Person]                    |
+| Records coding sessions     |                                  | Browses published           |
+| with an AI agent.           |                                  | transcripts.                |
++-----------------------------+                                  +-----------------------------+
+              |                                                                |
+              | reviews, redacts, and                                          | browses published
+              | shares sessions (browser)                                      | transcripts (browser)
+              v                                                                v
++-----------------------------+                                  +-----------------------------+
+| peasant                     |-- publishes a session (HTTPS) --->| village                     |
+| [Software System]           |                                  | [Software System]           |
+| Ingests, indexes, and       |                                  | Provides the registry and   |
+| serves the developer's      |                                  | commons for published       |
+| agent sessions locally.     |                                  | transcripts.                |
++-----------------------------+                                  +-----------------------------+
+              |
+              | reads session files and rows (JSONL, SQLite)
+              v
++-----------------------------+
+| agent session stores        |
+| [Software System, external] |
+| OpenCode, Claude Code, and  |
+| Cursor local stores.        |
++-----------------------------+
+
+Key:
+  Solid box = element. [Type] = C4 abstraction. "external" = outside the diagram scope.
+  Arrow = one relationship, read as "source, label (technology), target".
+```
 
 Read [`docs/architecture.md`](docs/architecture.md) to learn why the
 project exists, how Peasant and Village connect, where the shared

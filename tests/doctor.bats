@@ -159,6 +159,7 @@ setup() {
   [[ "${output}" == *"[✗] direnv is not on PATH"* ]]
   [[ "${output}" == *"direnv is not on PATH"* ]]
   [[ "${output}" == *"nix profile install nixpkgs#direnv"* ]]
+  [[ "${output}" == *"see README section 'Core team: the recommended dev shell'"* ]]
 }
 
 @test "devshell-unwired: direnv without the nix-direnv wiring prints the symlink fix" {

@@ -21,7 +21,7 @@ fi
 
 # README section titles, for the fix lines.
 NATIVE_SECTION="External contributors: install the tools on your OS"
-DEVSHELL_SECTION="Core team: the dev shell"
+DEVSHELL_SECTION="Core team: the recommended dev shell"
 
 checks=0
 failed=0
