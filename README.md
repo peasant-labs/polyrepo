@@ -171,6 +171,16 @@ peasant/
 Each repository builds and tests on its own. No repository needs a
 sibling checkout to build.
 
+## Architecture and contribution map
+
+Read [`docs/architecture.md`](docs/architecture.md) to learn why the
+project exists, how Peasant and Village connect, where the shared
+libraries fit, and which repository should own your first change.
+
+Read [`CONTRIBUTING.md`](CONTRIBUTING.md) for the workspace rules,
+cross-repository contract ceremony, testing discipline, and landing
+conventions.
+
 ## Daily use
 
 Run `scripts/sync-all` to fast-forward the default-branch worktree
