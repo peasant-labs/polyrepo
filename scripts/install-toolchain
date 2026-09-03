@@ -79,7 +79,7 @@ show_plan() {
   say "  polyrepo native toolchain"
   say ""
   say "  machine        ${os}/${arch}"
-  say "  Go             ${go_version} -> ${HOME}/go/${go_version}"
+  say "  Go             ${go_version} -> ${HOME}/.local/share/go/${go_version}"
   say "  Node           ${NODE_VERSION} -> fnm user install"
   say "  pnpm           ${PNPM_VERSION} -> active Node ${NODE_VERSION}"
   say "  profiles       no files will be edited"
@@ -131,7 +131,7 @@ install_go() {
   local asset="go${version}.${os}-${arch}.tar.gz"
   local url="https://go.dev/dl/${asset}"
   local archive="${WORK_DIR}/${asset}"
-  local dest="${HOME}/go/${version}"
+  local dest="${HOME}/.local/share/go/${version}"
 
   if [ -x "${dest}/bin/go" ]; then
     say "  Go ${version} already exists at ${dest}; keeping it."
@@ -145,7 +145,7 @@ install_go() {
     err "install-toolchain: the Go archive did not contain bin/go"
     exit 1
   }
-  mkdir -p "${HOME}/go"
+  mkdir -p "${HOME}/.local/share/go"
   mv "${WORK_DIR}/go" "$dest"
 }
 
@@ -173,7 +173,7 @@ show_result() {
   say ""
   say "  done. Add these lines to your shell configuration:"
   say ""
-  say "    export PATH=\"\$HOME/go/${version}/bin:\$PATH\""
+  say "    export PATH=\"\$HOME/.local/share/go/${version}/bin:\$HOME/go/bin:\$PATH\""
   # Print the command literally for the user to put in a profile.
   # shellcheck disable=SC2016
   say '    eval "$(fnm env --use-on-cd --shell bash)"'

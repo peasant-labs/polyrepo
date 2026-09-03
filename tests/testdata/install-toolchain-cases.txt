@@ -5,3 +5,4 @@
 args
 unsupported-os
 noninteractive-refusal
+user-local-go

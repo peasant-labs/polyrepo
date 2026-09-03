@@ -157,10 +157,10 @@ curl -fsSL \
 # Verify the download, then install it into a versioned user directory.
 printf '%s  %s\n' "$GO_SHA256" \
   "$GO_ASSET" | sha256sum --check -
-mkdir -p "$HOME/go/${GO_VERSION}"
-tar -C "$HOME/go/${GO_VERSION}" --strip-components=1 \
+mkdir -p "$HOME/.local/share/go/${GO_VERSION}"
+tar -C "$HOME/.local/share/go/${GO_VERSION}" --strip-components=1 \
   -xzf "$GO_ASSET"
-export PATH="$HOME/go/${GO_VERSION}/bin:$PATH"
+export PATH="$HOME/.local/share/go/${GO_VERSION}/bin:$HOME/go/bin:$PATH"
 
 # Install fnm without editing a shell profile, then install Node and pnpm.
 curl -fsSL https://fnm.vercel.app/install -o fnm-install
@@ -171,6 +171,10 @@ eval "$("$FNM_BIN" env --shell bash)"
 "$FNM_BIN" use 26
 npm install -g pnpm@11.24.0
 ```
+
+The Go SDK lives under `~/.local/share/go`, separate from the default
+`GOPATH` at `~/go`. Keep `~/go/bin` on `PATH` for commands installed by
+`go install`.
 
 ## What the steps do
 
