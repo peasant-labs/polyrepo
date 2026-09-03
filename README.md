@@ -76,19 +76,34 @@ Any system Go 1.21 or newer also works: with the default
 `go.mod` requires on the first build. (Debian 12 ships Go 1.19, which
 cannot bootstrap this. Use the tarball there.)
 
-## Optional: the dev shell
+## Core team: the dev shell
 
-`flake.nix` gives one dev shell with the toolchain for every repository
-(Go, Node, pnpm, linters, cloud CLIs). You do not need it to clone or
-sync. To use it, install Nix and direnv, then trust `.envrc`. Open a new
-shell after each block.
+The core team does not install the tools natively (see the section
+above). `flake.nix` gives one dev shell with the toolchain for every
+repository (Go, Node, pnpm, linters, cloud CLIs). You do not need it to
+clone or sync. To use it, install Nix and direnv, then trust `.envrc`.
+home-manager is not expected. Open a new shell after each block.
 
 ```sh
+# The Determinate installer sets up multi-user Nix.
 curl -fsSL https://install.determinate.systems/nix | sh -s -- install
 ```
 
 ```sh
+# direnv loads and unloads the environment that .envrc defines.
+# nix-direnv caches the dev shell and keeps it safe from garbage
+# collection. These two are the only profile installs you need.
 nix profile install nixpkgs#direnv
+nix profile install nixpkgs#nix-direnv
+
+# Wire nix-direnv into direnv: direnv auto-loads every file in lib/.
+mkdir -p ~/.config/direnv/lib
+ln -s ~/.nix-profile/share/nix-direnv/direnvrc ~/.config/direnv/lib/nix-direnv.sh
+```
+
+```sh
+# Hook direnv into your shell so it loads .envrc on every directory
+# change. Add the line for your shell, or both.
 echo 'eval "$(direnv hook zsh)"'  >> ~/.zshrc
 echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
 ```
@@ -97,8 +112,11 @@ echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
 cd polyrepo && direnv allow
 ```
 
-After this, `cd polyrepo` enters the dev shell by itself. Optional:
-add nix-direnv to cache the shell, so entering the directory is faster.
+After this, `cd polyrepo` enters the dev shell by itself, and
+nix-direnv caches the entry.
+
+macOS ships bash 3.2, too old for nix-direnv, which needs bash 4.4 or
+newer. Installing direnv through Nix or Homebrew works around this.
 
 ## What the steps do
 
