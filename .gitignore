@@ -1,3 +1,6 @@
+.direnv/
+**/.direnv/
+
 # The cloned repositories. One line per dir in repos.txt.
 # tests/gitignore.bats checks that every dir in repos.txt is listed here.
 /peasant/
