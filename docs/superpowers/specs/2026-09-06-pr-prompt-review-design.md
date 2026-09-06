@@ -357,8 +357,9 @@ before either consumer re-pins.
   the transcript id, the turn index where relevant, the timestamp, the rendered
   text, and the commit SHA for commit anchors.
 - `PullRequestAttachment` with repository owner and name, PR number, head SHA,
-  state (closed enum above), author and requester identity as Village user ids,
-  the comment and check run ids, and timestamps.
+  state (closed enum above), the author's Village user id, the requester's
+  GitHub id (a requester may have no Village account), the comment and check
+  run ids, and timestamps.
 - `PullRequestAttachmentResponse` bundling the attachment, the digest, and the
   attached transcript summaries.
 - Village routes:
