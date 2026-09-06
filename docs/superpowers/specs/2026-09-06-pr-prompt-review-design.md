@@ -135,7 +135,7 @@ request is durable. When a matching transcript is published, by hand or by hook,
 Village completes the attachment without a second click. `peasant village push`
 prints a hint when a request is waiting for the repository being pushed.
 
-### What the comment looks like
+### What the comment roughly looks like
 
 ```
 peasant · prompts behind #42
