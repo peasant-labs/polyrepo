@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **Executed 2026-09-06.** PR peasant-labs/schema#107. While the branch was open, `develop` released v0.15.0 and v0.16.0 and minted the artifact versions this plan names. The branch was re-based to Village API 0.16.0, Local API 0.11.0, and Types 0.17.0, freezing develop's 0.15.0, 0.10.0, and 0.16.0 artifacts instead. Read every version number below with that substitution.
+
 **Goal:** Declare, in the `schema` module, every wire type and Village route the pull request prompt attachment feature needs, bump the three specification versions, freeze the retired ones, and queue the release so peasant and village can re-pin.
 
 **Architecture:** All changes are additive. A new optional `Command` field on `TurnDetail` carries skill invocations onto the published wire. A `PromptDigest` domain type is the shared projection both Village and fairtrade will render. Village-side DTOs and seven routes are declared through the existing reflected-operation table so the generated OpenAPI, the TypeScript package, and every fixture gate stay in lockstep. Versions bump first so every later regeneration writes the new artifact names and the released 0.14.0 and 0.9.0 documents stay byte-frozen.
