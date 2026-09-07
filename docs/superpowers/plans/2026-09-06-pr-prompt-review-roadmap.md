@@ -11,7 +11,7 @@ guessing them.
 
 | Order | Plan | Lands | Gate to the next plan |
 |---|---|---|---|
-| 1 | `2026-09-06-pr-prompt-review-schema.md` | Village API 0.16.0, Local API 0.11.0, Types 0.17.0: `CommandInvocation` on `TurnDetail`, `PromptDigest`, attachment DTOs, the new Village routes. Executed; PR peasant-labs/schema#107 | schema release tag minted by the maintainer |
+| 1 | `2026-09-06-pr-prompt-review-schema.md` | Village API 0.16.0, Local API 0.11.0, Types 0.17.0: `CommandInvocation` on `TurnDetail`, `PromptDigest`, attachment DTOs, the new Village routes. Merged: peasant-labs/schema#107 (develop 8115024); release PR queued | schema release tag minted by the maintainer |
 | 2 | `2026-09-06-pr-prompt-review-peasant.md` (to write) | peasant-labs/peasant#323, #324, #325: `Command` emitted through the single conversion path, branch-aware commit association, the push hint, docs | peasant re-pinned and merged; useful without Village |
 | 3 | human step | GitHub App re-registered with Pull requests and Checks write scope, webhook URL and secret provisioned per environment | secrets present in each Village environment |
 | 4 | `2026-09-06-pr-prompt-review-village.md` (to write) | peasant-labs/village#106 to #113 in arrow order: migrations, webhook receiver, matching, digest, Markdown renderer, routes, PR page, settings | Village re-pinned and deployed |
