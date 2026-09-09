@@ -101,7 +101,7 @@ case "$*" in
     : > "$output"
     ;;
 esac'
-  make_stub npm 'exit 0'
+  make_stub corepack 'exit 0'
 
   run env PATH="$STUBS" HOME="$FAKE_HOME" POLYREPO_YES=1 \
     POLYREPO_GO_VERSION=1.26.3 "${SCRIPTS_DIR}/install-toolchain"
@@ -109,5 +109,6 @@ esac'
   [ "$status" -eq 0 ]
   [ -x "$FAKE_HOME/.local/share/go/1.26.3/bin/go" ]
   [ ! -e "$FAKE_HOME/go/1.26.3" ]
-  [[ "$output" == *'export PATH="$HOME/.local/share/go/1.26.3/bin:$HOME/go/bin:$PATH"'* ]]
+  [[ "$output" == *"via corepack"* ]]
+  [[ "$output" == *'export PATH="$HOME/.local/share/go/1.26.3/bin:$HOME/.local/share/fnm:$HOME/go/bin:$PATH"'* ]]
 }

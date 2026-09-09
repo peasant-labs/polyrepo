@@ -164,8 +164,12 @@ install_node_and_pnpm() {
   say "  installing Node ${NODE_VERSION}..."
   "$fnm_bin" install "$NODE_VERSION"
   "$fnm_bin" use "$NODE_VERSION"
-  say "  installing pnpm ${PNPM_VERSION}..."
-  npm install -g "pnpm@${PNPM_VERSION}"
+  # Corepack ships with Node and reads the pinned pnpm version from each
+  # repository's packageManager field, so activate it instead of a global
+  # npm install.
+  say "  activating pnpm ${PNPM_VERSION} via corepack..."
+  corepack enable pnpm
+  corepack prepare "pnpm@${PNPM_VERSION}" --activate
 }
 
 show_result() {
@@ -173,7 +177,7 @@ show_result() {
   say ""
   say "  done. Add these lines to your shell configuration:"
   say ""
-  say "    export PATH=\"\$HOME/.local/share/go/${version}/bin:\$HOME/go/bin:\$PATH\""
+  say "    export PATH=\"\$HOME/.local/share/go/${version}/bin:\$HOME/.local/share/fnm:\$HOME/go/bin:\$PATH\""
   # Print the command literally for the user to put in a profile.
   # shellcheck disable=SC2016
   say '    eval "$(fnm env --use-on-cd --shell bash)"'
