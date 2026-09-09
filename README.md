@@ -46,15 +46,16 @@ in the next section. External contributors can install the tools natively.
 |---|---|---|
 | Go | 1.26 (the modules require at least 1.25) | https://go.dev/dl/ or your package manager |
 | Node | 26 | https://nodejs.org/ or a version manager such as `fnm` or `nvm` |
-| pnpm | 11.24.0 | `npm install -g pnpm@11.24.0` |
+| pnpm | 11.24.0 | `corepack enable pnpm` (bundled with Node) |
 
 Every JavaScript repository pins the same pnpm version in the
-`packageManager` field of `package.json`. Install that version once with
-npm. Corepack is optional on Node 25 and later. If you use corepack,
-install it first, then enable it:
+`packageManager` field of `package.json`. Corepack ships with Node 26 and
+reads that field, so enable it once and it activates the pinned pnpm for
+you:
 
 ```sh
-npm install -g corepack && corepack enable
+corepack enable pnpm
+corepack prepare pnpm@11.24.0 --activate
 ```
 
 After you complete either setup path, run the doctor:
@@ -169,12 +170,14 @@ FNM_BIN="$HOME/.local/share/fnm/fnm"
 eval "$("$FNM_BIN" env --shell bash)"
 "$FNM_BIN" install 26
 "$FNM_BIN" use 26
-npm install -g pnpm@11.24.0
+corepack enable pnpm
+corepack prepare pnpm@11.24.0 --activate
 ```
 
 The Go SDK lives under `~/.local/share/go`, separate from the default
 `GOPATH` at `~/go`. Keep `~/go/bin` on `PATH` for commands installed by
-`go install`.
+`go install`. `fnm` installs under `~/.local/share/fnm`; keep that
+directory on `PATH` so `eval "$(fnm env ...)"` resolves in new shells.
 
 ## What the steps do
 
