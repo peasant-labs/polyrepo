@@ -111,6 +111,13 @@ point-in-time notes allowed are the dated digest at the end of this file.
 - **Release tooling is partly duplicated across peasant + schema** (`scripts/update-nix-vendor-hash.sh`,
   release-pr/release workflows; release-guard is single-sourced in the schema module and tooled by
   peasant, and fairtrade carries its own JS guard). When touching one copy, diff the sibling.
+- **CI and releases are budget-constrained (a small student org, not a big one):** do not cut a
+  release per contract change, and do not open or re-push PRs casually. Batch one schema release to
+  cover every pending contract change a consumer needs, and cut it only when a consumer actually
+  re-pins — hold the tag otherwise. Prefer one larger PR over several small ones, run the local
+  equivalents before pushing, and push once per change rather than iterating through full CI runs.
+  (For scale: a village PR push runs four jobs including a ~5-minute PostgreSQL+MinIO aggregate; a
+  schema push runs `make check` (~7 minutes) plus the contract gates.)
 - **Shipped-artifact hygiene (worker-prevented):** no internal task taxonomy — Beads IDs,
   slice/leaf-task names, phase or epic codenames — in shipped code, comments, docs, or commit
   messages; describe everything by substance. Self-grep the changed files for taxonomy tokens and
