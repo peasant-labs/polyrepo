@@ -6,9 +6,27 @@ on:
   pull_request:
 
 jobs:
+  determine-runner:
+    runs-on: ubuntu-latest
+    outputs:
+      runner: ${{ steps.pick.outputs.use-runner }}
+    steps:
+      - name: Pick a runner
+        id: pick
+        uses: mikehardy/runner-fallback-action@dc7732f9e532c451b2527b288ba8d58fd4b0a4ca # v1.1.0
+        with:
+          organization: peasant-labs
+          primary-runner: "self-hosted,nixos"
+          fallback-runner: "ubuntu-26.04"
+          fallback-on-error: true
+          github-token: ${{ secrets.RUNNER_STATUS_TOKEN }}
+      - name: Report chosen runner
+        run: 'echo "chosen: ${{ steps.pick.outputs.use-runner }}"'
+
   tests:
     name: tests
-    runs-on: ubuntu-26.04
+    needs: determine-runner
+    runs-on: ${{ fromJson(needs.determine-runner.outputs.runner) }}
     env:
       GIT_CONFIG_GLOBAL: /dev/null
       GIT_AUTHOR_NAME: polyrepo ci
