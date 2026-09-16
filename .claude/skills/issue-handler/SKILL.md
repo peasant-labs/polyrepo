@@ -36,7 +36,7 @@ Set explicit values and use them for every command:
 
 ```sh
 GH_REPO="peasant-labs/<repo>"
-REPO_HOST="/home/minttea/dev/peasant-labs/<repo-host>"
+REPO_HOST="<workspace-root>/<repo-host>"
 BASE="develop" # or main
 LIVE_REMOTE="canonical" # peasant/village; origin for schema/fairtrade
 ISSUE="<number>"

@@ -108,7 +108,7 @@ Write `<base-dir>/report-<a|b|c>.md` with:
    scenario, impact, and a specific fix.
 9. **An explanatory ASCII diagram** of the mechanism as built.
 10. **At least one `c4` diagram**, linted:
-    `python3 /home/minttea/dev/peasant-labs/.claude/skills/c4-model/scripts/c4-lint.py <report>` —
+    `python3 <workspace-root>/.claude/skills/c4-model/scripts/c4-lint.py <report>` —
     exit 0 required.
 11. **Checks run / skipped** with exact commands and observed results, and coverage limits.
 12. **Integration with the current default branch** — merge, generation, and relevant tests.

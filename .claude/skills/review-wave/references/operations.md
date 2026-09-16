@@ -48,7 +48,7 @@ the base, the current default branch, and prior review records.
 GH_REPO="peasant-labs/<repo>"
 PR=<number>
 LIVE_REMOTE="canonical"   # or origin
-REPO_HOST="/home/minttea/dev/peasant-labs/<repo-host>"
+REPO_HOST="<workspace-root>/<repo-host>"
 
 gh pr view "$PR" -R "$GH_REPO" --json title,author,state,isDraft,body,baseRefName,headRefOid, \
   mergeable,mergeStateStatus,additions,deletions,files,comments,statusCheckRollup
@@ -148,7 +148,7 @@ gives: its worktree, its DSN, the report path it must write, and these constrain
   scenario, impact and a fix, an explanatory ASCII diagram, at least one `c4` diagram, checks run
   and skipped, and the integration result against the current default branch.
 - Lint every `c4` block with
-  `python3 /home/minttea/dev/peasant-labs/.claude/skills/c4-model/scripts/c4-lint.py <report>`
+  `python3 <workspace-root>/.claude/skills/c4-model/scripts/c4-lint.py <report>`
   until it exits 0.
 - Public-audience prose: no internal task IDs, slice or phase names, or workflow taxonomy.
 - No edits, commits, pushes, Beads writes, or GitHub comments; no `bd dolt push/pull`; no
