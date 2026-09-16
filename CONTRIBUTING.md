@@ -1,6 +1,6 @@
 # peasant-labs — polyrepo guide for agents
 
-`/home/minttea/dev/peasant-labs` is a **multi-repo workspace**: independently-versioned git
+`peasant-labs/polyrepo` is a **multi-repo workspace**: independently-versioned git
 repositories developed together. This file carries the workspace map, cross-repo rules, and
 ratified invariants; repo-specific detail lives in each repo's own `AGENTS.md` — read that first
 when working in a repo. (The root also hosts other repos — `bestiary`, `reeve`, `provenance`,
