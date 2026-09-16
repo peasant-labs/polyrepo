@@ -83,6 +83,15 @@ point-in-time notes allowed are the dated digest at the end of this file.
 - **Contract ceremony (hard rule):** a wire-contract change is its own schema-repo PR + tag BEFORE
   the consumer PRs re-pin it; the redact module follows the same tag-before-re-pin pattern. Stated
   in both the peasant and village guides.
+- **Schema changes are the expensive, high-risk path (hard rule):** treat any schema change — the
+  shared wire contract in `schema` **and** a database migration in either backend — as more costly
+  and higher-risk than an ordinary frontend or backend change. Both are surfaces other code reads:
+  the wire contract is consumed across repos and needs its own PR + tag before a consumer re-pins
+  it, and a shipped migration is immutable and effectively irreversible in production, so a wrong
+  column, index, or CHECK is a forward-only fix. Do not reach for one when a non-schema change
+  would do; when one is genuinely needed, say so up front, expect the slower review (contract
+  gates, migration + invariant tests, zero-diff codegen), and batch it with other pending changes
+  rather than cutting one per change.
 
 ## Conventions
 
