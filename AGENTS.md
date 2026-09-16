@@ -265,6 +265,9 @@ against the demo, probe computed styles, and diff against the tracked baseline.
   Review & UAT discipline); both apps resolve fairtrade from the published npm registry, never a
   local dev-link; capture outputs go to `review-capture/` or `/tmp` — never commit per-round proof
   PNGs.
+- **A PR body's screenshots pin their branch.** Images are embedded from a
+  `<repo>-<n>--screenshots` side branch, never from the feature branch, so that branch (and its
+  worktree) must outlive the PR: deleting it while the PR is open breaks every image in the body.
 - **Screenshot paths are one-line output:** present a related screenshot set as exactly one
   Markdown line containing one absolute path expression with `{...}` brace alternatives for the
   theme/surface/demo-app axes, structured so every expansion names an existing artifact.
@@ -278,27 +281,3 @@ against the demo, probe computed styles, and diff against the tracked baseline.
   active maintainer; GitHub no-self-approval); each repo's runbook §6 carries the re-enable
   checklist.
 - The visual-harness scripts remain per-surface/per-repo duplicates — no shared toolkit yet.
-
-## Digest (2026-09-16 — non-derivable state only; everything else from manifests + gh)
-
-- **Epic #116 (git↔session integration) is functionally complete.** #106–#112 and #134 are merged;
-  #113 (the frontend pull request page) merged as `0918e45`. The only children left are the two
-  P3s, both unblocked: **#114** (pull-request-scoped read grant for repository readers who are not
-  collective members) and **#115** (attach PR review comments as annotations on digest turns).
-- **Parked on purpose:** #206 (bound the attachment candidate scan) and #207 (the publish hook
-  matches a repository by name only and cannot use its index).
-- **Untracked follow-ups — file these before they are lost.** They live only in PR review threads:
-  from #175, an executable interleaving regression for the conditional state write, exact menu
-  set-equality against the pinned schema *and* the live CHECK, and required-name fixture manifests;
-  from #178's review, G2 (a mounted dedup proof through real PostgreSQL and the generated query),
-  G3 (fixture manifests/assertion breadth) and G4 (the unused `KnownEvent`). G1 became #200 and is
-  done.
-- **The `village-113--screenshots` branch and worktree must outlive #210's body** — its images are
-  embedded there; the same is true of the earlier `<repo>-<n>--screenshots` branches.
-- **Dogfooding locally needs the compose images.** `docker-compose*.yml` pins
-  `minio/minio:RELEASE.2025-07-23T15-54-02Z`, which no longer exists upstream, so
-  `make backend-encrypted-test` fails locally (CI uses `quay.io` and is fine). A cached
-  `minio/minio:latest` lets the plain `make dev` stack still start; a fresh machine cannot pull the
-  pinned tags.
-- Plan after this digest: finish the remaining tickets, then dogfood the product end to end for UX
-  and bugs.
