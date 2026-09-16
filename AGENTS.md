@@ -117,6 +117,25 @@ point-in-time notes allowed are the dated digest at the end of this file.
   ```
   It is idempotent, so re-running it on an already-linked PR is harmless. Do this at open time, not
   later: a stacked PR is exactly the case where the reviewer never sees the issue link.
+- **Ship a multi-PR change as a real GitHub stack (public preview, enabled on this org).** A branch
+  chain is not automatically a stack; make it one so the merge is ordered and the upper layers
+  re-target themselves. After opening the PRs (bottom first, each based on the one below):
+  ```sh
+  gh api repos/<owner>/<repo>/stacks -X POST \
+    -F 'pull_requests[]:=<bottom-pr>' -F 'pull_requests[]:=<top-pr>'
+  ```
+  (the `:=` matters: `-f` sends strings and the endpoint requires integers). Read it back with
+  `gh api repos/<owner>/<repo>/stacks/<stack-number>` or GraphQL `pullRequest { stack { number } stackEntry { position } }`.
+  **Merging a stack cannot use `gh pr merge`** — the legacy endpoint refuses it. Use the async API,
+  which merges every PR up to and including the one requested, then poll the returned UUID:
+  ```sh
+  gh api repos/<owner>/<repo>/pulls/<top-or-any-pr>/merge-async -X PUT \
+    -F merge_method=squash -F 'commit_title=<title>'
+  gh api repos/<owner>/<repo>/pulls/<pr>/merge-async/<uuid>   # poll until it reports a result
+  ```
+  Merge requirements for the whole stack come from the BOTTOM PR's base branch (so `develop` rules
+  and CI apply to every layer), and a stack merge is atomic. `--force-with-lease` on a stacked branch
+  is fine after a rebase: rebases are expected in a stack, and the branch is not shared.
 
 - **Literal Markdown in shell commands:** protect Markdown passed through a shell (`gh issue
   comment`, `bd comments add`) from expansion — a single-quoted argument or safely quoted file
