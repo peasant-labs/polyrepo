@@ -104,6 +104,20 @@ point-in-time notes allowed are the dated digest at the end of this file.
   `make build`), remove the merged worktree, and delete its remote branch. Verify merges via
   `gh pr view <n> --json state,mergeCommit`, not a possibly-stale local ref.
 - **No git hooks** (hard rule). Nix devShell via `flake.nix`/direnv.
+- **Link every PR to its issue explicitly — GitHub only does it for you on the happy path.** A
+  closing keyword (`Closes #N`) in the PR body links the PR under the issue's Development section
+  **only when the PR merges into the default branch**. A stacked PR (base is another feature
+  branch) and a partial PR (`Part of #N`) therefore get no link, and the issue silently carries a
+  body-only reference. So after opening any PR whose base is not the default branch, add the link
+  yourself with the same mutation the UI's "Link a pull request" uses:
+  ```sh
+  issue=$(gh api repos/<owner>/<repo>/issues/<n> --jq .node_id)
+  pr=$(gh api repos/<owner>/<repo>/pulls/<pr> --jq .node_id)
+  gh api graphql -f query="mutation { addCloseIssueReferences(input: {issueId: \"$issue\", pullRequestIds: [\"$pr\"]}) { issue { number } } }"
+  ```
+  It is idempotent, so re-running it on an already-linked PR is harmless. Do this at open time, not
+  later: a stacked PR is exactly the case where the reviewer never sees the issue link.
+
 - **Literal Markdown in shell commands:** protect Markdown passed through a shell (`gh issue
   comment`, `bd comments add`) from expansion — a single-quoted argument or safely quoted file
   input; never unquoted backticks/`$`/globs. Verify the published comment if the command reports
