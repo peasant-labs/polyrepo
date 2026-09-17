@@ -92,6 +92,22 @@ point-in-time notes allowed are the dated digest at the end of this file.
   would do; when one is genuinely needed, say so up front, expect the slower review (contract
   gates, migration + invariant tests, zero-diff codegen), and batch it with other pending changes
   rather than cutting one per change.
+- **Before extending the contract or the database, work down this list and take the first that
+  fits.**
+  1. Is the answer already derivable from data both sides already hold?
+  2. Can the consumer compute it — a frontend or CLI comparing fields it already receives —
+     instead of the server serving it?
+  3. Does an existing field, route, or read already carry it?
+  4. Only then extend the wire contract or add a migration.
+
+  Say in the PR which steps were tried and why the earlier ones did not fit, so a reviewer can see
+  the expensive path was chosen deliberately. This is a heuristic with a rationale obligation, not
+  a ban: the test is whether new STATE was avoided, not whether a migration was. An index adds no
+  semantics and is often the right answer (a lookup with no leading column has to have one); a
+  table or column adds state, and state has to be kept true. And consumer-side inference must stay
+  a comparison of what the consumer already receives — re-deriving a server rule in React (the
+  selection matcher, the redaction policy, what visibility a repository requires) is the
+  re-implementation this workspace forbids, not an inference to prefer.
 
 ## Conventions
 
