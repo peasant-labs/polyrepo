@@ -83,6 +83,34 @@ point-in-time notes allowed are the dated digest at the end of this file.
 - **Contract ceremony (hard rule):** a wire-contract change is its own schema-repo PR + tag BEFORE
   the consumer PRs re-pin it; the redact module follows the same tag-before-re-pin pattern. Stated
   in both the peasant and village guides.
+- **Schema changes are the expensive, high-risk path (hard rule):** treat any schema change — the
+  shared wire contract in `schema` **and** a database migration in either backend — as more costly
+  and higher-risk than an ordinary frontend or backend change. Both are surfaces other code reads:
+  the wire contract is consumed across repos and needs its own PR + tag before a consumer re-pins
+  it, and a shipped migration is immutable and effectively irreversible in production, so a wrong
+  column, index, or CHECK is a forward-only fix. Do not reach for one when a non-schema change
+  would do; when one is genuinely needed, say so up front, expect the slower review (contract
+  gates, migration + invariant tests, zero-diff codegen), and batch it with other pending changes
+  rather than cutting one per change.
+- **Before extending the contract or the database, work down this list and take the first that
+  fits.**
+  1. Is the answer already derivable from data both sides already hold?
+  2. Can the consumer compute it — a frontend or CLI comparing fields it already receives —
+     instead of the server serving it?
+  3. Does an existing field, route, or read already carry it?
+  4. Only then extend the wire contract or add a migration.
+
+  Say in the PR which steps were tried and why the earlier ones did not fit, so a reviewer can see
+  the expensive path was chosen deliberately. This is a heuristic with a rationale obligation, not
+  a ban: the test is whether new STATE was avoided, not whether a migration was. An index adds no
+  semantics and is often the right answer (a lookup with no leading column has to have one); a
+  table or column adds state, and state has to be kept true. And consumer-side inference is
+  allowed to be one of two things only: a comparison of what the consumer already receives, or a
+  restatement of a server decision in user-facing copy that decides nothing. What it must not be is
+  a re-derivation of a rule the consumer then acts on — the selection matcher, the redaction
+  policy, the visibility a repository requires — which is the re-implementation this workspace
+  forbids. Copy that restates a consequence names the decision and never becomes the place a rule
+  is enforced, so if the server's rule changes the copy is what has to move with it.
 
 ## Conventions
 
@@ -95,6 +123,39 @@ point-in-time notes allowed are the dated digest at the end of this file.
   `make build`), remove the merged worktree, and delete its remote branch. Verify merges via
   `gh pr view <n> --json state,mergeCommit`, not a possibly-stale local ref.
 - **No git hooks** (hard rule). Nix devShell via `flake.nix`/direnv.
+- **Link every PR to its issue explicitly — GitHub only does it for you on the happy path.** A
+  closing keyword (`Closes #N`) in the PR body links the PR under the issue's Development section
+  **only when the PR merges into the default branch**. A stacked PR (base is another feature
+  branch) and a partial PR (`Part of #N`) therefore get no link, and the issue silently carries a
+  body-only reference. So after opening any PR whose base is not the default branch, add the link
+  yourself with the same mutation the UI's "Link a pull request" uses:
+  ```sh
+  issue=$(gh api repos/<owner>/<repo>/issues/<n> --jq .node_id)
+  pr=$(gh api repos/<owner>/<repo>/pulls/<pr> --jq .node_id)
+  gh api graphql -f query="mutation { addCloseIssueReferences(input: {issueId: \"$issue\", pullRequestIds: [\"$pr\"]}) { issue { number } } }"
+  ```
+  It is idempotent, so re-running it on an already-linked PR is harmless. Do this at open time, not
+  later: a stacked PR is exactly the case where the reviewer never sees the issue link.
+- **Ship a multi-PR change as a real GitHub stack (public preview, enabled on this org).** A branch
+  chain is not automatically a stack; make it one so the merge is ordered and the upper layers
+  re-target themselves. After opening the PRs (bottom first, each based on the one below):
+  ```sh
+  gh api repos/<owner>/<repo>/stacks -X POST \
+    -F 'pull_requests[]:=<bottom-pr>' -F 'pull_requests[]:=<top-pr>'
+  ```
+  (the `:=` matters: `-f` sends strings and the endpoint requires integers). Read it back with
+  `gh api repos/<owner>/<repo>/stacks/<stack-number>` or GraphQL `pullRequest { stack { number } stackEntry { position } }`.
+  **Merging a stack cannot use `gh pr merge`** — the legacy endpoint refuses it. Use the async API,
+  which merges every PR up to and including the one requested, then poll the returned UUID:
+  ```sh
+  gh api repos/<owner>/<repo>/pulls/<top-or-any-pr>/merge-async -X PUT \
+    -F merge_method=squash -F 'commit_title=<title>'
+  gh api repos/<owner>/<repo>/pulls/<pr>/merge-async/<uuid>   # poll until it reports a result
+  ```
+  Merge requirements for the whole stack come from the BOTTOM PR's base branch (so `develop` rules
+  and CI apply to every layer), and a stack merge is atomic. `--force-with-lease` on a stacked branch
+  is fine after a rebase: rebases are expected in a stack, and the branch is not shared.
+
 - **Literal Markdown in shell commands:** protect Markdown passed through a shell (`gh issue
   comment`, `bd comments add`) from expansion — a single-quoted argument or safely quoted file
   input; never unquoted backticks/`$`/globs. Verify the published comment if the command reports
@@ -223,6 +284,9 @@ against the demo, probe computed styles, and diff against the tracked baseline.
   Review & UAT discipline); both apps resolve fairtrade from the published npm registry, never a
   local dev-link; capture outputs go to `review-capture/` or `/tmp` — never commit per-round proof
   PNGs.
+- **A PR body's screenshots pin their branch.** Images are embedded from a
+  `<repo>-<n>--screenshots` side branch, never from the feature branch, so that branch (and its
+  worktree) must outlive the PR: deleting it while the PR is open breaks every image in the body.
 - **Screenshot paths are one-line output:** present a related screenshot set as exactly one
   Markdown line containing one absolute path expression with `{...}` brace alternatives for the
   theme/surface/demo-app axes, structured so every expansion names an existing artifact.
@@ -236,4 +300,3 @@ against the demo, probe computed styles, and diff against the tracked baseline.
   active maintainer; GitHub no-self-approval); each repo's runbook §6 carries the re-enable
   checklist.
 - The visual-harness scripts remain per-surface/per-repo duplicates — no shared toolkit yet.
-
