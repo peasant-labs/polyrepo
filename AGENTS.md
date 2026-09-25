@@ -214,6 +214,23 @@ point-in-time notes allowed are the dated digest at the end of this file.
   a replacement is user-ratified and lands in Fairtrade first.
 - Workers should commit early and commit often using atomic commits and conventional commit messages.
 
+## Test promotion checklist
+
+Test complexity must be promoted only when the lower-level test cannot observe the real risk. Before approving a new elaborate test, record answers to the following questions in the implementation plan or review handoff:
+
+1. **Subject** — What exact invariant is being protected? Is it production behavior, generated output, or only a test helper?
+2. **Necessity** — Why can a direct unit/fixture test not catch the failure? What concrete failure or incident justifies the extra harness?
+3. **Production path** — Does the test execute the real path? If not, what exactly is the boundary being modeled?
+4. **Cost** — Does it copy production code, enumerate build configurations, spawn processes, or scan screenshots? What is the maximum runtime and failure surface?
+5. **Lifetime** — What temporary files, directories, databases, and processes does it create? What happens after timeout, panic, SIGKILL, or partial setup?
+6. **Concurrency** — Can another test process touch the same files or database? Is there ownership, or should the test use an isolated worktree/service?
+7. **CI parity** — Does the exact command run from a clean checkout? Does it work with the real CI checkout depth? Are environment variables and generated artifacts explicit?
+8. **Evidence** — Does the test observe user-visible or production behavior? For visual work: full shell, both themes, exact served artifact, and durable evidence? For backend work: real process/service path where the risk requires it?
+9. **Mutation** — Can a small mutation make the test fail for the intended reason? Is the test proving behavior rather than a private helper’s shape?
+10. **Exit condition** — What evidence would allow simplifying or deleting this test later? Is there a follow-up owner if the harness becomes more elaborate than the invariant?
+
+This checklist is intended to catch harnesses that grow beyond the invariant they protect. It should have caught the topology test before it reached thousands of lines of test infrastructure.
+
 ## Review & UAT discipline
 
 The user is NEVER the backstop for a repeat finding or a design-system violation. Mandatory:
