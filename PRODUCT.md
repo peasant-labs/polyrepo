@@ -58,23 +58,25 @@ Peasant-labs shows the agent session that produced a code change, matched to the
   - `standard` is the only level offered.
   - Unknown categories fail closed.
 - **Visibility.** A transcript is private, shared with collectives, or public.
-- **Audience for this overhaul: collectives only.** Publishing from the local web shares a transcript with the collectives the developer picks. The public commons is hidden in the UI, not deleted. An update keeps the audience the transcript already has.
+- **Audience for this overhaul: collectives only.** Publishing from the local web shares a transcript with the collectives the developer picks. The public commons is hidden in the UI, not deleted.
+- **Publishing works like sharing a document.** Publish and update open one popup that shows what leaves the machine (the redaction check) and who can read it (the collectives). An update keeps the audience the transcript already has unless the developer changes it there. Removing a collective revokes its members' access.
 - **Licenses.** Only `CC0-1.0`, `CC-BY-4.0`, and `CC-BY-SA-4.0` are offered, and a granted license cannot be revoked. A license is asked for only when something becomes public, so the collectives-only flow does not ask for one.
 - **PR linking.**
   - A PR author links transcripts by commenting `/peasant attach` on the pull request, then confirming the preview.
-  - Automatic linking when a PR opens is a setting that is off by default.
+  - Automatic linking when a PR opens is a personal setting on village, off by default. Each author decides for their own transcripts.
   - Matching uses commit evidence: at least one recorded commit must be in the PR.
   - Attaching never changes who can read a transcript. Only the collectives it was published to can read it, including when the repository is public.
 - **Auto-publish.**
   - The CLI path is encouraged over typing `/peasant` for repeat use. A managed git hook (`peasant village hooks install`, on pre-push or post-commit) publishes the sessions for its project to the collectives bound to that folder or repository.
   - Those sessions are published redacted, and nothing is held back for review. The developer gives consent once, when they set up the binding.
   - Bindings live beside the hook settings rather than in the main config.
+  - Turning it on takes one step: a checkbox in the publish popup, or `/peasant auto` in Claude Code, which uses the collectives the developer last published to.
 - **Settings.** The local web settings page edits every peasant setting and the auto-publish bindings. The TUI `peasant config` covers only a subset, and that is accepted.
 - **Collectives.**
   - Acceptance is open, verified only, or curated.
   - Data access is members only, contributors, or public.
   - The roles are owner, member, and contributor, and they are fixed today.
-  - A collective can link many repositories but only one GitHub org today.
+  - A collective can link many repositories but only one GitHub org. Linking several orgs needs a schema change and is deferred.
 - **Selection.** The kickstart selection scopes discovery and lists only. It is not access control, and stored sessions stay reachable by deep link.
 - **Sign-in.** It is GitHub only for now. The other providers are hidden, not deleted.
 - **Overhaul constraints.**
