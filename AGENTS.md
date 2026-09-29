@@ -19,6 +19,9 @@ point-in-time notes allowed are the dated digest at the end of this file.
   releases); fairtrade, redact, transcript-browser → `main`.
 - **`flake.nix` + `.envrc` (direnv)** — the Nix devShell.
 - **`llm/`** — cross-repo, LLM-facing planning docs (fairtrade adoption playbooks, research).
+- **`PRODUCT.md`** — the workspace product record (users, purpose, positioning, constraints,
+  principles) that the `impeccable` skill reads before any UI work. Fairtrade carries its own
+  `PRODUCT.md` for the design system and points back here for end-user truth.
 - **Remotes (peasant): `peasant-labs/peasant-prerelease-archive` (frozen pre-launch
   history), `peasant-labs/peasant` (live).** Bare `gh pr/issue <n>` resolves
   against the archive, whose numbering overlaps the live repo — always pass
@@ -212,6 +215,15 @@ point-in-time notes allowed are the dated digest at the end of this file.
   (`GRAPH_APP_SECTIONS` in `src/ui/inuse/InUseShell.jsx`); consumers derive from it and fail
   loudly on unknown or unmapped section IDs rather than silently dropping sections. Binding until
   a replacement is user-ratified and lands in Fairtrade first.
+- **UI work goes through impeccable ([impeccable.style](https://impeccable.style/)):** every
+  UI/UX task (wireframes, shaping, a new surface, a redesign, polish, critique, audit) runs
+  through the `impeccable` skill. Run its `context` setup first, then the matching command:
+  `shape` for planning and wireframes, `critique` or `audit` for review. It reads the root
+  `PRODUCT.md` (fairtrade reads its own). Fairtrade stays the visual authority, so impeccable is
+  the process and quality bar applied inside fairtrade's world, never a second design system.
+  Where the two conflict (fonts, the heading scale, motion defaults), fairtrade's documented
+  invariants win until a change is ratified in fairtrade first. Install the skill per user from
+  impeccable.style.
 - Workers should commit early and commit often using atomic commits and conventional commit messages.
 
 ## Test promotion checklist
