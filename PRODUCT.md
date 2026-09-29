@@ -64,6 +64,7 @@ Peasant-labs shows the agent session that produced a code change, matched to the
   - A PR author links transcripts by commenting `/peasant attach` on the pull request, then confirming the preview.
   - Automatic linking when a PR opens is a setting that is off by default.
   - Matching uses commit evidence: at least one recorded commit must be in the PR.
+  - Attaching never changes who can read a transcript. Only the collectives it was published to can read it, including when the repository is public.
 - **Auto-publish.**
   - The CLI path is encouraged over typing `/peasant` for repeat use. A managed git hook (`peasant village hooks install`, on pre-push or post-commit) publishes the sessions for its project to the collectives bound to that folder or repository.
   - Those sessions are published redacted, and nothing is held back for review. The developer gives consent once, when they set up the binding.
