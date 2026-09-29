@@ -64,6 +64,11 @@ Peasant-labs shows the agent session that produced a code change, matched to the
   - A PR author links transcripts by commenting `/peasant attach` on the pull request, then confirming the preview.
   - Automatic linking when a PR opens is a setting that is off by default.
   - Matching uses commit evidence: at least one recorded commit must be in the PR.
+- **Auto-publish.**
+  - The CLI path is encouraged over typing `/peasant` for repeat use. A managed git hook (`peasant village hooks install`, on pre-push or post-commit) publishes the sessions for its project to the collectives bound to that folder or repository.
+  - Those sessions are published redacted, and nothing is held back for review. The developer gives consent once, when they set up the binding.
+  - Bindings live beside the hook settings rather than in the main config.
+- **Settings.** The local web settings page edits every peasant setting and the auto-publish bindings. The TUI `peasant config` covers only a subset, and that is accepted.
 - **Collectives.**
   - Acceptance is open, verified only, or curated.
   - Data access is members only, contributors, or public.
@@ -93,7 +98,7 @@ Peasant-labs shows the agent session that produced a code change, matched to the
 
 ## Product Principles
 
-1. **Local first, consent always.** Redact on the machine, show what will leave it, fail closed, and publish only on an explicit act.
+1. **Local first, consent always.** Redact on the machine, show what will leave it, and fail closed. Nothing is published without the developer's explicit act: a click, or an auto-publish binding they set up themselves.
 2. **One action from where you are.** The session you are reading is the one you publish. The PR you open finds its transcripts.
 3. **Git is the spine.** A transcript matters because it traces to commits and pull requests.
 4. **Tell the truth about state.** Show whether a session is published, who can read it, and what an update changes.
