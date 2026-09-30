@@ -211,10 +211,12 @@ point-in-time notes allowed are the dated digest at the end of this file.
   closed when either side is missing or blank.
 - **Shared SxS visual gates compare the canonical fairtrade demo (left/reference) to the current
   consuming app (right)** — never app-to-app unless that is the explicit regression target.
-- **Graph app section order is canonical:** `analytics | changes | code map`, owned by fairtrade
-  (`GRAPH_APP_SECTIONS` in `src/ui/inuse/InUseShell.jsx`); consumers derive from it and fail
-  loudly on unknown or unmapped section IDs rather than silently dropping sections. Binding until
-  a replacement is user-ratified and lands in Fairtrade first.
+- **The local app section registry is canonical:** `home | settings` in the nav, then
+  `analytics | changes | code map` by route only, owned by fairtrade (`LOCAL_APP_SECTIONS` in
+  `src/ui/inuse/InUseShell.jsx`, each entry `{ id, label, inNav }`; `GRAPH_APP_SECTIONS` is a
+  deprecated alias that keeps the earlier three-entry value). Consumers derive their nav and routes
+  from it and fail loudly on unknown or unmapped section IDs rather than silently dropping
+  sections. Binding until a replacement is user-ratified and lands in Fairtrade first.
 - **UI work goes through impeccable ([impeccable.style](https://impeccable.style/)):** every
   UI/UX task (wireframes, shaping, a new surface, a redesign, polish, critique, audit) runs
   through the `impeccable` skill. Run its `context` setup first, then the matching command:
@@ -291,7 +293,7 @@ The user is NEVER the backstop for a repeat finding or a design-system violation
   the `changes` label and `/review` routes remain in force until a replacement is user-ratified —
   never silently rename or delete them. Wire changes follow the contract ceremony.
 - **`/share` is canonical** (no `/push` alternate route) and stays OUTSIDE fairtrade's
-  graph-section registry; share-bridge scan/cache/fail-closed semantics must be preserved across
+  section registry; share-bridge scan/cache/fail-closed semantics must be preserved across
   UI changes. Fairtrade owns the official review/redaction/consent/share composition
   (fairtrade-design-system#3, per-category `RedactionReview` filtering #4).
 
