@@ -126,6 +126,25 @@ point-in-time notes allowed are the dated digest at the end of this file.
   `make build`), remove the merged worktree, and delete its remote branch. Verify merges via
   `gh pr view <n> --json state,mergeCommit`, not a possibly-stale local ref.
 - **No git hooks** (hard rule). Nix devShell via `flake.nix`/direnv.
+- **A change that spans several PRs or repos has one umbrella issue.** When an initiative needs
+  more than one epic or more than one repository, open one umbrella issue, in `peasant-labs/polyrepo`
+  for cross-repo work. It holds:
+  - the why, and a concept map of the whole change;
+  - every child epic, linked as a sub-issue;
+  - every PR with its status (merged, ready for review, in progress, next), in review order;
+  - a reading order for reviewers.
+
+  Every PR in the initiative links the umbrella near the top of its body. Keep the PR list current as
+  PRs merge. Reviewers need the big picture before they review one piece of it.
+- **Every PR states its merge dependencies.** The PR body has a `Merge dependencies` section with
+  three parts:
+  - what must merge or be released first (another PR, a schema tag, a package release);
+  - whether the PR is safe to merge on its own now;
+  - what breaks if it is merged too early.
+
+  The umbrella issue carries the same information as one dependency map across repos. An agent never
+  marks a PR ready while something it needs is unmerged or unreleased, so "ready" always means "safe
+  to merge alone".
 - **Link every PR to its issue explicitly — GitHub only does it for you on the happy path.** A
   closing keyword (`Closes #N`) in the PR body links the PR under the issue's Development section
   **only when the PR merges into the default branch**. A stacked PR (base is another feature

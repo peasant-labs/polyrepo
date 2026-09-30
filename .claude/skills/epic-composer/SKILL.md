@@ -174,6 +174,10 @@ available.
    - Record each issue URL on its Beads task with `bd comments add`.
    - Leave the user-deferred ledger epic open and untouched.
 
+8b. **Umbrella (when several epics serve one initiative)**
+   - Create one umbrella issue, in `peasant-labs/polyrepo` for cross-repo work. It gets the why, a concept map of the whole change, and the epics linked as sub-issues.
+   - Leave room for a PR list in review order and a merge-dependency map. The orchestrator keeps both current.
+
 9. **Report**
    - Send one message. Include: the epics with numbers and priorities, the DAG with numbers, the
      re-homings, the label mapping, and the count of issues created versus retitled. Then stop.

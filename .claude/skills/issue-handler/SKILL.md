@@ -175,6 +175,14 @@ The PR body must contain:
 ## Issue
 Fixes #<N>
 
+## Merge dependencies
+- must merge or release first: <PR, schema tag, package release, or none>
+- safe to merge alone now: yes | no
+- breaks if merged too early: <what, or nothing>
+
+## Umbrella
+Part of <umbrella issue URL>, when the change spans several PRs or repos
+
 ## Risk
 Tier A | B | C, with reason
 
