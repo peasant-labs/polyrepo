@@ -183,7 +183,7 @@ Fixes #<N>
 - breaks if merged too early: <what, or nothing>
 
 ## Umbrella
-Part of <umbrella issue URL>. Required when the initiative needs more than one epic, or its pull requests span more than one repository.
+Part of <umbrella issue URL>. Required by the umbrella rule: An initiative that needs more than one epic, or whose pull requests span more than one repository, gets one umbrella issue.
 
 ## Risk
 Tier A | B | C, with reason
