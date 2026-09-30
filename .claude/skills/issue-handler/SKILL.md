@@ -165,6 +165,8 @@ gh pr create -R "$GH_REPO" --base "$BASE" --head "$BRANCH" \
   --title "type(scope): concise summary" --body-file <pr-body-file>
 ```
 
+Add `--draft` when `Merge dependencies` says the PR is not safe to merge alone. Mark it ready (`gh pr ready`) only after every dependency has landed. A PR that is ready is always safe to merge on its own.
+
 The PR body must contain:
 
 ```md
@@ -177,11 +179,11 @@ Fixes #<N>
 
 ## Merge dependencies
 - must merge or release first: <PR, schema tag, package release, or none>
-- safe to merge alone now: yes | no
+- safe to merge alone now: yes | no (if no, the PR stays a draft until the dependency lands)
 - breaks if merged too early: <what, or nothing>
 
 ## Umbrella
-Part of <umbrella issue URL>, when the change spans several PRs or repos
+Part of <umbrella issue URL>. Required when the initiative needs more than one epic, or its pull requests span more than one repository.
 
 ## Risk
 Tier A | B | C, with reason
