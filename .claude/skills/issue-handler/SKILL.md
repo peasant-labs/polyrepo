@@ -254,6 +254,17 @@ Merge only when all conditions are true:
 
 Use the merge method required by the target repository. Do not guess or override branch policy. Peasant, Village, and Fairtrade normally land focused PRs as one squashed change. Schema follows its documented squash and merge-commit ceremony. Never push release tags; release tags are minted by repository automation after a maintainer merges an approved release PR.
 
+## Hand-off to a human
+
+When the PR must stop at ready-to-merge for a human instead of merging, finish every merge condition above first. Then post one PR comment titled `Why this needs a human review`, using a body file, with these parts:
+
+1. **Why it is not agent-merged:** for example user-facing UI, a migration, an irreversible release, or a repository rule that reserves the merge.
+2. **The parts that deserve a second look:** each with file paths and one line on the risk or judgment call.
+3. **What was already verified:** review waves, CI, evidence and mutation checks.
+4. **Merge dependencies:** what must merge or release first, and whether the PR is safe to merge alone.
+
+Report the comment URL with the PR. A hand-off without this comment is incomplete.
+
 ## Cleanup after merge
 
 Verify the PR state and merge commit from GitHub, then sync the local default branch immediately:

@@ -249,6 +249,18 @@ This checklist is intended to catch harnesses that grow beyond the invariant the
 
 The user is NEVER the backstop for a repeat finding or a design-system violation. Mandatory:
 
+- **Every hand-off to a human explains itself.** When an agent stops at ready-to-merge for a human
+  instead of merging, it posts one PR comment titled "Why this needs a human review" with four parts:
+  1. **Why it is not agent-merged.** For example: a user-facing UI change, a database migration,
+     a release that mints an irreversible tag, or a repository rule that reserves the merge.
+  2. **The specific parts that deserve a second look.** Give each one file paths and one line on the
+     risk or judgment call.
+  3. **What was already verified automatically.** Review waves, CI, evidence and mutation checks, so
+     the human can skip them.
+  4. **Merge dependencies.** What must merge or release first, and whether the PR is safe to merge
+     alone.
+
+  A PR whose hand-off lacks this comment is not ready for human review.
 - **The live in-use demo is the fidelity oracle** — match it element-for-element; when the demo
   and the DS docs conflict, match the demo and file the conflict as a DS-repo followup (do not fix
   it inside an adoption). Flag app↔demo divergences and genuine gaps, not demo-faithful matches
