@@ -126,6 +126,27 @@ point-in-time notes allowed are the dated digest at the end of this file.
   `make build`), remove the merged worktree, and delete its remote branch. Verify merges via
   `gh pr view <n> --json state,mergeCommit`, not a possibly-stale local ref.
 - **No git hooks** (hard rule). Nix devShell via `flake.nix`/direnv.
+- **One umbrella issue per multi-epic or cross-repo initiative.** An initiative that needs more than one epic, or whose pull requests span more than one repository, gets one umbrella issue. Open it in
+  `peasant-labs/polyrepo` for cross-repo work. It holds:
+  - the why, and a concept map of the whole change;
+  - every child epic, linked as a sub-issue;
+  - a reading order for reviewers and the review order of the PRs;
+  - a merge-dependency map;
+  - a PR list with each status (merged, ready for review, in progress, next), headed "statuses last
+    checked <date>". That list is a snapshot and goes stale by design. The review order, reading
+    order and dependency map are the issue's lasting value.
+
+  Every PR in the initiative links the umbrella near the top of its body. Reviewers need the big
+  picture before they review one piece of it.
+- **Every PR states its merge dependencies.** The PR body has a `Merge dependencies` section with
+  three parts:
+  - what must merge or be released first (another PR, a schema tag, a package release);
+  - whether the PR is safe to merge on its own now;
+  - what breaks if it is merged too early.
+
+  The umbrella issue carries the same information as one dependency map across repos. An agent opens
+  a PR as a draft when it is not safe to merge alone, and marks it ready only after its dependencies
+  land. So "ready" always means "safe to merge alone".
 - **Link every PR to its issue explicitly — GitHub only does it for you on the happy path.** A
   closing keyword (`Closes #N`) in the PR body links the PR under the issue's Development section
   **only when the PR merges into the default branch**. A stacked PR (base is another feature
@@ -249,6 +270,12 @@ This checklist is intended to catch harnesses that grow beyond the invariant the
 
 The user is NEVER the backstop for a repeat finding or a design-system violation. Mandatory:
 
+- **Every hand-off to a human explains itself.** When an agent stops at ready-to-merge for a human
+  instead of merging, it posts one PR comment titled "Why this needs a human review". The comment
+  has four parts: why the PR is not agent-merged, the parts that deserve a second look, what was
+  already verified, and the merge dependencies. The exact contract lives in one place, the
+  `issue-handler` skill's "Hand-off to a human" section. A PR whose hand-off lacks this comment is
+  not ready for human review.
 - **The live in-use demo is the fidelity oracle** — match it element-for-element; when the demo
   and the DS docs conflict, match the demo and file the conflict as a DS-repo followup (do not fix
   it inside an adoption). Flag app↔demo divergences and genuine gaps, not demo-faithful matches

@@ -165,6 +165,8 @@ gh pr create -R "$GH_REPO" --base "$BASE" --head "$BRANCH" \
   --title "type(scope): concise summary" --body-file <pr-body-file>
 ```
 
+Add `--draft` when `Merge dependencies` says the PR is not safe to merge alone. Mark it ready (`gh pr ready`) only after every dependency has landed. A PR that is ready is always safe to merge on its own.
+
 The PR body must contain:
 
 ```md
@@ -174,6 +176,14 @@ The PR body must contain:
 
 ## Issue
 Fixes #<N>
+
+## Merge dependencies
+- must merge or release first: <PR, schema tag, package release, or none>
+- safe to merge alone now: yes | no (if no, the PR stays a draft until the dependency lands)
+- breaks if merged too early: <what, or nothing>
+
+## Umbrella
+Part of <umbrella issue URL>. Required by the umbrella rule: An initiative that needs more than one epic, or whose pull requests span more than one repository, gets one umbrella issue.
 
 ## Risk
 Tier A | B | C, with reason
@@ -253,6 +263,17 @@ Merge only when all conditions are true:
 - The PR is open, not draft, and mergeable.
 
 Use the merge method required by the target repository. Do not guess or override branch policy. Peasant, Village, and Fairtrade normally land focused PRs as one squashed change. Schema follows its documented squash and merge-commit ceremony. Never push release tags; release tags are minted by repository automation after a maintainer merges an approved release PR.
+
+## Hand-off to a human
+
+When the PR must stop at ready-to-merge for a human instead of merging, finish every merge condition above first. Then post one PR comment titled `Why this needs a human review`, using a body file, with these parts:
+
+1. **Why it is not agent-merged:** for example user-facing UI, a migration, an irreversible release, or a repository rule that reserves the merge.
+2. **The parts that deserve a second look:** each with file paths and one line on the risk or judgment call.
+3. **What was already verified:** review waves, CI, evidence and mutation checks.
+4. **Merge dependencies:** what must merge or release first, and whether the PR is safe to merge alone.
+
+Report the comment URL with the PR. A hand-off without this comment is incomplete.
 
 ## Cleanup after merge
 

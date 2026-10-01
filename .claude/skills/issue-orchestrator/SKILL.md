@@ -137,6 +137,14 @@ Do not poll background agents with sleeps. Continue independent work and use com
 | Five review waves with blockers | Stop and ask; do not merge |
 | Contract package not published | Keep consumers open or prepared, but do not merge re-pins |
 
+## Umbrella issue and dependency map
+
+An initiative that needs more than one epic, or whose pull requests span more than one repository, gets one umbrella issue. When the approved set needs one and it does not exist, create it (in `peasant-labs/polyrepo` for cross-repo work), then keep it current:
+- Every PR in the set, with its status and the review order.
+- A merge-dependency map: an arrow for each "must merge or release first" relation, and a table of pull request, depends on, safe to merge alone now, and what breaks if merged too early.
+
+Update it when a PR opens, becomes ready, or merges, and head the PR list with "statuses last checked <date>". Tell every handler to link the umbrella and state its merge dependencies in the PR body.
+
 ## Reporting
 
 Lead with repository-qualified status:
