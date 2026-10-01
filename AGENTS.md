@@ -313,8 +313,17 @@ The user is NEVER the backstop for a repeat finding or a design-system violation
 - **Kickstart selection:** `ingest.SelectionMatcher` is the canonical matcher (server-side; never
   reimplement in React). Selection scopes DISCOVERY/LISTS only — it is NOT an access-control
   boundary: already-stored sessions stay deep-link-viewable, historical rows are removed only by
-  manual `peasant prune`, and publishing is user-initiated (`/share`) from the user's own recorded
-  sessions only.
+  manual `peasant prune`. Publication requires the developer's explicit consent: a publish action
+  or an auto-publish binding they set up themselves, and only their own recorded sessions can be
+  published.
+- **Automatic publishing:** saving a binding installs nothing; hook installation is a separate
+  explicit action. Deleting or pausing the last binding matching a repository and hook event stops
+  that binding's automatic publishing, including from an already-installed hook. Another matching
+  binding for the same event can continue publishing; independently consented terminal hooks keep
+  their consent. New binding-driven transcripts are private and unlicensed. Updates preserve
+  existing visibility and license; rules do not resubmit an already decided share or make a
+  transcript public. An explicitly configured binding can add a collective with no prior share
+  decision.
 - **Git history ↔ sessions:** the target is Git as the timeline spine annotated with associated
   user sessions (bound vs candidate associations kept distinct; unattached sessions discoverable);
   the `changes` label and `/review` routes remain in force until a replacement is user-ratified —
