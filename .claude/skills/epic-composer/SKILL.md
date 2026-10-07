@@ -1,6 +1,6 @@
 ---
 name: epic-composer
-description: Group follow-up items into vertical epics with prioritized sub-issues and a blocker DAG. Get sign-off on the full set. Write ASD-STE100 bodies with ASCII diagrams. Post to GitHub with sub-issues, blocked-by links, and existing labels. Mirror into Beads only if the project uses it. Use when deferred items or review findings must become an approved set of epics and issues.
+description: Group follow-up items into vertical epics with prioritized sub-issues and a blocker DAG. Get sign-off on the full set. Write ASD-STE100 bodies with full implementation detail and ASCII or Mermaid diagrams. Post to GitHub with sub-issues, blocked-by links, and existing labels. Mirror into Beads only if the project uses it. Use when deferred items or review findings must become an approved set of epics and issues.
 ---
 
 # Compose, approve, and post epics with their sub-issues
@@ -72,7 +72,7 @@ available.
 4. **Draft the bodies**
    - Language rules (hard):
      - ASD-STE100. Short sentences. Active voice. One idea per sentence. Imperative steps. Plain
-       words. No em-dashes.
+       words. Em-dashes are allowed.
      - Use industry-standard names: fail-safe default, schema migration, backfill, closed enum,
        CHECK constraint, trust boundary, discovery scope vs access control, fixture, golden test,
        mutation testing, build tag, REST endpoint, WebSocket topic, OpenAPI contract, evidence,
@@ -80,26 +80,41 @@ available.
      - Reuse the codebase's concept vocabulary. The identifiers do not have to match. Grep before
        you name a concept. Keep one shared glossary across all bodies, so the set reads as one
        system.
+     - Reuse the codebase's named types and enums. The schema module owns the wire types. A
+       closed set uses the repo's pattern: a named type, a const set, an `AllX` slice, and a
+       `NewX` constructor that refuses an unknown value. Raw strings pass a `New*` constructor
+       at the trust boundary. Never a raw string for a closed set.
      - Write cross-repo references as `owner/repo#N`. Example: `acme/schema#82`. GitHub links
        only that form. A bare `schema#82` never links. Same-repo references stay `#N`.
      - Do not put internal task taxonomy in bodies. No Beads ids. No slice, wave, or proposal
        names. No reviewer axis names. Refer to work by substance and by issue numbers.
-   - Epic body sections: Why. Concept map (an ASCII diagram of the API surfaces, the
-     infrastructure pieces, and the child issues placed on that map). Children table (priority,
-     title, blocked by). Definition of done. Related epics.
+   - Epic body sections: Why. Concept map (an ASCII or Mermaid diagram of the API surfaces,
+     the infrastructure pieces, and the child issues placed on that map). Children table
+     (priority, title, blocked by). Definition of done. Related epics.
    - Issue body sections: Problem (grounded with file paths and measured numbers). Scope (what
-     changes and what does not). Acceptance (observable outcomes, fixtures named). Diagram.
-     Blocked by / Blocks. Related.
+     changes and what does not). Public interfaces (every interface, type, function signature,
+     CLI flag, and config key, with code blocks and the exact names). Data shapes (the DDL, row,
+     or JSON shapes the issue owns). Flow (ASCII or Mermaid). Test cases (the named validation
+     cases, each with what it asserts). Validation plan (the gates and measurements). Blocked
+     by / Blocks. Related.
+   - Carry the decided detail. A body that only summarizes is incomplete. The design record
+     already decided the names and shapes; the body compiles them for the reader. A Beads
+     export is not a body: Beads carries the tracking fields; the body carries the interfaces,
+     shapes, cases, and gates.
+   - A foundation issue delivers compilable stubs, never empty declarations. Every seam exists,
+     compiles, and refuses with a not-implemented error until its implementation lands.
    - The issue diagram is narrow. It shows that issue's own change: the exact data flow, the
      before and after, or the failure path. It must be more specific than the epic diagram. It is
      never a rehash.
    - Bodies written before the new issues exist use `NEW-<key>` for their numbers.
-   - Delegate the writing to background agents. Give each agent an explicit cheap model. Do not
-     use the session's top model unless the user names it. Use one shared brief file, one shared
-     glossary file, and one draft file per body.
-   - Review every draft. Run the language rules as a checklist. Grep for internal taxonomy, bare
-     cross-repo references, and em-dashes. Read at least one epic, one new issue, and one
-     addendum in full.
+   - Delegate the writing to background agents when the volume warrants it. Give each agent an
+     explicit cheap model. Do not use the session's top model unless the user names it. Use one
+     shared brief file, one shared glossary file, and one draft file per body. The orchestrator
+     may write the bodies directly when the user prefers it.
+   - Review every draft. Run the language rules as a checklist. Grep for internal taxonomy and
+     bare cross-repo references. Check the type reuse: no raw strings for closed sets. Run the
+     coverage check: every named validation case from the design appears in some body; fill the
+     gaps. Read at least one epic, one new issue, and one addendum in full.
 
 5. **Refine and approve the bodies**
    - Present the drafts to the user. Give the paths. Show the epic bodies inline when they are
@@ -173,10 +188,6 @@ available.
      `bd dep add <later> --blocked-by <earlier>` for every arrow. Set each item's priority.
    - Record each issue URL on its Beads task with `bd comments add`.
    - Leave the user-deferred ledger epic open and untouched.
-
-8b. **Umbrella.** An initiative that needs more than one epic, or whose pull requests span more than one repository, gets one umbrella issue.
-   - Create one umbrella issue, in `peasant-labs/polyrepo` for cross-repo work. It gets the why, a concept map of the whole change, and the epics linked as sub-issues.
-   - Leave room for a PR list in review order and a merge-dependency map. The orchestrator keeps both current.
 
 9. **Report**
    - Send one message. Include: the epics with numbers and priorities, the DAG with numbers, the

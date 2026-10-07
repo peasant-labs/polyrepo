@@ -44,7 +44,8 @@ them>. Do not propose <e.g. a scoring formula>. Review what is here against the 
 PR checkouts are read-only. The integration checkout is disposable for local merge and generation
 experiments: no commits, no pushes, reset it when done.
 
-Test recipe (adjust to the repository's TESTING guide):
+Spot-check recipe (the orchestrator already ran the authoritative checks; see section 3a).
+Reproduce a specific claim only; do not repeat a suite the evidence already covers:
 
 ```sh
 export TEST_DATABASE_URL="<dsn>"
@@ -55,6 +56,21 @@ go test -tags=integration -race ./internal/database/      # fresh empty base per
 
 Reset the base database before each full-package run; integration tests run the migrations
 themselves. <Note any gates that cannot run locally and why; CI covers them at the SHA.>
+
+## 3a. Validation evidence (already run by the orchestrator)
+
+The orchestrator ran these at the exact reviewed SHA, once, before this wave started. They are
+relevant to this change and up to date at this SHA, so cite them as the baseline. Spot-check a
+specific claim when it is load-bearing; do not repeat a covered suite wholesale.
+
+| Subject | Command or workflow | Observed result (load-bearing line) | Run URL | Wall time |
+|---|---|---|---|---|
+| <repository gate> | | | | |
+| <exact-head CI> | | | | |
+| <gate that normally skips on a pull request> | | | | |
+
+Coverage limits: <what the evidence does not establish, for example port-bound or container-bound
+suites.>
 
 ## 4. Issue requirements and acceptance
 
@@ -110,7 +126,8 @@ Write `<base-dir>/report-<a|b|c>.md` with:
 10. **At least one `c4` diagram**, linted:
     `python3 <workspace-root>/.claude/skills/c4-model/scripts/c4-lint.py <report>` —
     exit 0 required.
-11. **Checks run / skipped** with exact commands and observed results, and coverage limits.
+11. **Checks run / skipped**: the exact commands and observed results, plus coverage limits; section
+    3a already carries relevant, up-to-date results, so do not repeat a covered suite.
 12. **Integration with the current default branch** — merge, generation, and relevant tests.
 
 ## 10. Reviewer constraints

@@ -110,6 +110,28 @@ createdb -h 127.0.0.1 -p "$PORT" -U test <db>
 Record the worktree paths and DSNs in the brief. Pick three free ports and keep the mapping
 consistent for the whole wave.
 
+## Phase 1b — Run the authoritative checks once
+
+The orchestrator runs the authoritative checks at the exact reviewed SHA once, before any reviewer
+starts. Three reviewers re-running the same suite is wasted time and yields three partial results.
+
+- Run the repository gate from the reviewed checkout. Peasant: `make check`. Village:
+  `cd backend && gofmt -l . && go vet ./... && go build ./... && go test -race ./...`. Use the
+  repository's own gate from its `AGENTS.md`.
+- Read the exact-head CI status (`gh pr checks <n> -R <repo>`), and run any gate the change needs
+  that normally skips on a pull request. For the Peasant full-stack e2e, dispatch `e2e.yml`
+  manually on the head.
+- Capture for each: the exact command or workflow, the observed result with its load-bearing output
+  line, the run URL, and the wall time. A green wrapper is not evidence; a positive
+  `--- PASS: <test>` line is.
+- Write the results into the brief under "Validation evidence (already run)" and turn the reviewer
+  test recipe into a spot-check recipe: reproduce a specific claim when it is load-bearing; do not
+  repeat a suite the evidence already covers.
+- Name the coverage limits (heavy container work, port-bound suites, integration-tagged packages)
+  so reviewers know what the evidence does not establish.
+- The evidence only needs to be relevant to the change and up to date at the reviewed SHA. A moved
+  SHA makes it stale and restarts the wave.
+
 ## Phase 2 — Write the wave brief
 
 Write one brief file at `$BASE_DIR/wave-brief.md` from `templates/wave-brief.md`. It carries
@@ -126,6 +148,8 @@ Rules for the brief:
 - Point at areas worth verifying; do not seed findings. The reviewers must find them.
 - Keep the reviewers' own constraints in the brief: read-only checkouts, scratch only in the
   integration checkout, no Beads or GitHub writes, no pushes, time-box.
+- Include the "Validation evidence (already run)" section from phase 1b, and frame the test recipe
+  as spot-checks, not a re-run.
 
 ## Phase 3 — Spawn reviewers
 
@@ -150,6 +174,8 @@ gives: its worktree, its DSN, the report path it must write, and these constrain
 - Lint every `c4` block with
   `python3 <workspace-root>/.claude/skills/c4-model/scripts/c4-lint.py <report>`
   until it exits 0.
+- Consume the brief's "Validation evidence (already run)": verify it and spot-check specific claims
+  rather than repeating a covered suite.
 - Public-audience prose: no internal task IDs, slice or phase names, or workflow taxonomy.
 - No edits, commits, pushes, Beads writes, or GitHub comments; no `bd dolt push/pull`; no
   `aura-swarm`.
