@@ -55,7 +55,7 @@ Use `gh ... -R "$GH_REPO"` for every issue, PR, comment, review, run, and merge 
 7. **Validate** - Run the target repository's full required gate and all focused gates required by the changed surface. Never weaken or remove tests to make a gate pass.
 8. **Visual proof** - For interface changes, capture the mounted production path in both themes from the exact branch, inspect it, verify build provenance, and upload durable screenshots to the PR.
 9. **Sync base** - If the live base moved or the branch was open for about one hour, fetch and merge the live base into the feature branch. Regenerate generated artifacts instead of hand-merging them. Re-run the gate.
-10. **Ship** - Inspect status, diff, and recent history. Stage intended files only. Commit with `git agent-commit`, push to the live remote, and open a focused PR against the correct base.
+10. **Ship** - Inspect status, diff, and recent history. Stage intended files only. Commit, push to the live remote, and open a focused PR against the correct base.
 11. **Review loop** - Run the required independent review wave on the current PR head. Post findings to the PR, fix blockers, and re-review every material new head.
 12. **CI** - Watch all checks on the reviewed head. Fix branch-caused failures, re-run local gates, push, and repeat review when merge-bound files changed.
 13. **Merge** - Merge only when the current head meets all review, CI, visual, and repository gates.
