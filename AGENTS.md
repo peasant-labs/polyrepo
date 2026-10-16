@@ -18,15 +18,25 @@ point-in-time notes allowed are the dated digest at the end of this file.
   **Default branches:** peasant, village, schema → `develop` (peasant/village reserve `main` for
   releases); fairtrade, redact, transcript-browser → `main`.
 - **`flake.nix` + `.envrc` (direnv)** — the Nix devShell.
+- **This guide is one file with aliases:** `CLAUDE.md` and `CONTRIBUTING.md` are symlinks to
+  `AGENTS.md` (at the workspace root and in `polyrepo/`), and the workspace-root guide and
+  `polyrepo/AGENTS.md` are kept byte-identical. Edit the real `AGENTS.md` only: writing through a
+  link, or editing a file you believe is a second copy, writes the same bytes again and
+  duplicates the section.
+- **`.beads/`** — shared Beads task DB, prefix `plabs`; run `bd` from this root. Work runs the
+  *pasture* 12-phase epoch protocol (full reference: the `protocol` skill docs).
+- **Beads service boundary (hard rule): NEVER run `bd dolt start` or `bd dolt stop`.** If Beads
+  reports its Dolt service unavailable or needing intervention, stop Beads work and let the user
+  handle the service — no restarts, repairs, or lifecycle workarounds.
 - **`llm/`** — cross-repo, LLM-facing planning docs (fairtrade adoption playbooks, research).
 - **`PRODUCT.md`** — the workspace product record (users, purpose, positioning, constraints,
   principles) that the `impeccable` skill reads before any UI work. Fairtrade carries its own
   `PRODUCT.md` for the design system and points back here for end-user truth.
-- **Remotes (peasant): `peasant-labs/peasant-prerelease-archive` (frozen pre-launch
-  history), `peasant-labs/peasant` (live).** Bare `gh pr/issue <n>` resolves
+- **Remotes (peasant): `origin` = `peasant-labs/peasant-prerelease-archive` (frozen pre-launch
+  history), `canonical` = `peasant-labs/peasant` (live).** Bare `gh pr/issue <n>` resolves
   against the archive, whose numbering overlaps the live repo — always pass
-  `-R peasant-labs/peasant`, and hand subagents a local git range, never a
-  bare PR number.
+  `-R peasant-labs/peasant`, push to `canonical`, and hand subagents a local git range, never a
+  bare PR number. Issue numbers written before 2026-08 (anywhere) are archive numbering.
 
 ## The core repos
 
@@ -86,15 +96,21 @@ point-in-time notes allowed are the dated digest at the end of this file.
 - **Contract ceremony (hard rule):** a wire-contract change is its own schema-repo PR + tag BEFORE
   the consumer PRs re-pin it; the redact module follows the same tag-before-re-pin pattern. Stated
   in both the peasant and village guides.
-- **Schema changes are the expensive, high-risk path (hard rule):** treat any schema change — the
-  shared wire contract in `schema` **and** a database migration in either backend — as more costly
-  and higher-risk than an ordinary frontend or backend change. Both are surfaces other code reads:
-  the wire contract is consumed across repos and needs its own PR + tag before a consumer re-pins
-  it, and a shipped migration is immutable and effectively irreversible in production, so a wrong
-  column, index, or CHECK is a forward-only fix. Do not reach for one when a non-schema change
-  would do; when one is genuinely needed, say so up front, expect the slower review (contract
-  gates, migration + invariant tests, zero-diff codegen), and batch it with other pending changes
-  rather than cutting one per change.
+
+- **A contract or migration change is deliberate, not casual.** The shared wire contract in
+  `schema` **and** a database migration in either backend are surfaces other code reads: the wire
+  contract is consumed across repos and needs its own PR + tag before a consumer re-pins it, and a
+  shipped migration is immutable and effectively irreversible in production, so a wrong column,
+  index, or CHECK is a forward-only fix. Such a change carries the contract gates, the migration
+  and invariant tests, and zero-diff codegen; expect the slower review, say so up front, and batch
+  pending changes into one release instead of cutting one per change. Cost is a reason to be
+  deliberate and to batch — never a reason to drift, and never a reason to let a consumer
+  re-derive a shared rule. The only exception is a scenario the user explicitly asks for.
+- **Anything genuinely shared is owned by the contract.** If two repos must agree on a concept, it
+  belongs in the schema, never in a per-consumer derivation. Update the contract (its own PR + tag
+  before a consumer re-pins) instead of computing, restating, or forking it locally: two
+  definitions of one shared rule ARE drift, and drift is the failure mode this workspace treats as
+  the defect. A shared rule is not made cheap by duplicating it.
 - **Before extending the contract or the database, work down this list and take the first that
   fits.**
   1. Is the answer already derivable from data both sides already hold?
@@ -118,9 +134,9 @@ point-in-time notes allowed are the dated digest at the end of this file.
 ## Conventions
 
 - **Worktree naming:** `<primary-repo>-<issue#>--<semantic-commit>--<descriptive-name>`, the
-  *primary repo* being the one the change centers on; a cross-repo epic reuses that one name
+  *primary repo* being the one the change centers on; a cross-repo epoch reuses that one name
   across every participating repo's worktree.
-- **Landing:** squash the epic branch → `merge --no-ff` into the repo's default branch. After a PR
+- **Landing:** squash the epoch branch → `merge --no-ff` into the repo's default branch. After a PR
   merges: sync the local default worktree (`git -C <repo>/develop pull`), run the repo's normal
   build from the freshly synced worktree before creating new feature worktrees from it (peasant:
   `make build`), remove the merged worktree, and delete its remote branch. Verify merges via
@@ -249,6 +265,40 @@ point-in-time notes allowed are the dated digest at the end of this file.
   impeccable.style.
 - Workers should commit early and commit often using atomic commits and conventional commit messages.
 
+## GitHub tracker (Peasant Labs Tracker)
+
+`peasant-labs` project **#4, "Peasant Labs Tracker"** (`PVT_kwDOD8oAWc4BmST0`) is the board every
+repo's issues land on. Every epic and every sub-issue goes on it, including a cross-repo child. An
+issue that is not on the board is invisible to planning.
+
+Set three fields. Leave every other field empty.
+
+| field | values | when |
+|---|---|---|
+| Status | `Backlog` · `Ready` · `In progress` · `In review` · `Done` | `Backlog` at creation; the only field with a lifecycle |
+| Size | `XS` · `S` · `M` · `L` · `XL` | at creation, from the scope |
+| Team | `UI / UX` · `Data Pipelines` · `Village` · `Research` | at creation, from the owning surface |
+
+**`Priority` stays empty.** Its single-select has no options configured, so priority lives in the
+issue title (`[P2] <title>`, `[P3][Epic] <title>`). `Estimate`, `Iteration`, `Start date`, and
+`Target date` are unused.
+
+**Issue type** comes from the org's set — `Task`, `Bug`, `Feature`, `Refactor` — chosen by
+substance. An epic keeps the `epic` label as well; the label and the type are separate axes.
+
+```sh
+R=peasant-labs/schema; N=155                     # the issue to place
+ITEM=$(gh project item-add 4 --owner peasant-labs \
+  --url "https://github.com/$R/issues/$N" --format json --jq .id)
+gh project field-list 4 --owner peasant-labs     # Status / Size / Team with their option ids
+gh project item-edit --project-id PVT_kwDOD8oAWc4BmST0 --id "$ITEM" \
+  --field-id <field-id> --single-select-option-id <option-id>   # repeat once per field
+
+# issue type (GraphQL); read the org's type ids first
+gh api graphql -f query='{ organization(login:"peasant-labs"){ issueTypes(first:20){ nodes { id name } } } }'
+gh api graphql -f query='mutation { updateIssue(input:{id:"<issue-node-id>", issueTypeId:"<type-id>"}) { issue { number issueType { name } } } }'
+```
+
 ## Test promotion checklist
 
 Test complexity must be promoted only when the lower-level test cannot observe the real risk. Before approving a new elaborate test, record answers to the following questions in the implementation plan or review handoff:
@@ -302,6 +352,33 @@ The user is NEVER the backstop for a repeat finding or a design-system violation
   actually landed on the integration branch and is present in the built artifact (grep the DOM for
   marker classes, check route/Navbar wiring) — "reviewers accepted the body" ≠ "the app ships it."
 
+## Epoch execution model (local overrides)
+
+The `protocol` skill docs own the full 12-phase reference; this is how THIS workspace runs it:
+
+- **No shell-launched agents (hard rule):** never invoke `opencode`, `opencode --standalone`,
+  `aura-swarm`, or any other agent/Task CLI from a shell to create or coordinate subagents. Agents
+  must be spawned only through the host harness's subagent tool. If an agent cannot spawn a nested
+  subagent, it must not emulate nesting in a shell; it returns control to the parent, which spawns
+  the required agent through the harness. This preserves the configured model, tool surface,
+  session context, and review provenance.
+- **OpenCode subagents:** `worker-mini` for mini-model implementation fixes and `reviewer` for
+  review waves; their prompts start with `/worker` / `/reviewer`. All three reviewers in one wave
+  use the SAME agent — `reviewer-mini-deepseek` — one per lens; never mix reviewer agents or
+  models within a wave. No `aura-swarm` when the user explicitly asks for subagents.
+- **Implementation runs as parallel slices** — decompose for maximum concurrency; slices MAY
+  overlap in files as long as they touch semantically/functionally distinct parts. **One isolated
+  worktree per worker**, branched off the integration branch. **Merge conflicts are the
+  orchestrator's job**, not the workers'; ambiguous design choices go to the user.
+- **Reviewers spin up fresh per review wave** (continuity lives in the Beads records + the
+  standing checklist, not a live agent). Plan review needs all three axes to ACCEPT. Code review
+  gate: **merge at ZERO BLOCKERS** — IMPORTANT/MINOR findings route to follow-ups instead of
+  blocking (velocity override, user ruling 2026-08-05).
+- **Proposal numbering restarts per epoch** (PROPOSAL-1, SLICE-1, …); revisions increment within
+  the epoch.
+- **Review completed slices in ONE coordinated wave**, not piecemeal — batch the dispatch over all
+  completed slices while preserving per-slice verdicts and severity trees.
+
 ## Product invariants (summaries — full detail in `peasant/develop/AGENTS.md`)
 
 - **Redaction:** categories are `secrets` / `pii` / `paths` / `project` (git remotes, import
@@ -335,22 +412,35 @@ The user is NEVER the backstop for a repeat finding or a design-system violation
 
 ## Visual / screenshot UI harness
 
-Each app repo carries a headless-Chrome/Puppeteer capture harness: shoot a surface in **both
-themes**, shoot the fairtrade **demo** for the same surface, stitch side-by-side (SxS), eyeball
-against the demo, probe computed styles, and diff against the tracked baseline.
+Fairtrade now owns a **Playwright-first** visual-validation harness. The canonical Fairtest
+package is a private workspace source package: a browser-neutral core plus a small app-owned
+adapter/host contract. Apps keep routes, fixtures, mocks, boot, selectors, actions, assertions,
+surface inventory, thresholds, and product meaning.
 
-- **Locations:** village `frontend/scripts/visual/` · peasant `web/scripts/visual/` · fairtrade
-  `scripts/` (its tracked regression references live at the repo root in `baselines/`).
-- **Primitives — duplicated per-surface and per-repo (consolidation into one parameterized toolkit
-  is a tracked followup):** boot (start the app or real binary on a fixed port) · mock (fake
-  backend REST/auth) · shoot (screenshot per surface × theme) · stitch (demo↔app SxS) · diff
-  (pixel-diff vs committed baseline) · probe (`getComputedStyle` assertions — the definitive token
-  check) · gate (pass/fail wrapper).
-- **Discipline:** verify computed styles, not just pixels (close-value token pairs are
-  indistinguishable in scaled PNGs); verify build provenance before trusting any capture (see
-  Review & UAT discipline); both apps resolve fairtrade from the published npm registry, never a
-  local dev-link; capture outputs go to `review-capture/` or `/tmp` — never commit per-round proof
-  PNGs.
+- **Targets:** a **product target** proves persistent product chrome plus representative mounted
+  body, exact route/active-section/view state, rendered theme, a real interaction, and served-build
+  provenance. A **Storybook target** proves one mounted component, interaction, ARIA/axe, and token
+  state only. Storybook never substitutes for a built-app journey or a server-backed product path.
+- **Runner boundary:** Playwright is the required repeatable runner and the sole required
+  full-catalog path. Legacy Puppeteer is filtered local compatibility or bounded migration only;
+  never run an unfiltered Puppeteer catalog beside the Playwright catalog. Specialized SurfaceGate,
+  graph, timeline, screenshot, provenance, and mutation probes stay protected until an equivalent
+  Playwright replacement plus a zero-reference audit exists.
+- **Evidence:** the current Fairtrade path is mounted **single capture** with durable, inspectable,
+  fail-closed artifacts for both themes. SxS is deferred until a real consumer subject and canonical
+  Fairtrade reference exist; a helper-only or same-target pair is not mounted proof. When a valid
+  pair exists, shared SxS compares the canonical Fairtrade demo (left/reference) to the consuming app
+  (right), never app-to-app.
+- **Locations:** Fairtest and its Fairtrade dogfood live under Fairtrade `packages/fairtest/` and
+  `scripts/fairtest/`; existing focused Fairtrade tools remain under `scripts/`, with tracked
+  regression references in `baselines/`. Peasant and Village keep their app-owned adapters and
+  journeys under `web/scripts/visual/` and `frontend/scripts/visual/` until separately adopted.
+- **Discipline:** verify computed styles and the mounted production path, not just pixels; verify
+  build provenance before trusting any capture; prove both themes where visual risk requires them;
+  keep evidence fail closed; never substitute a local dev-link for the published Fairtrade package;
+  write transient captures to `review-capture/` or `/tmp`, never committed proof PNGs. Any agent
+  may use `agent-browser` for local exploration and self-verification when it is the appropriate
+  tool; its output is never evidence, a required CI dependency, or a durable regression baseline.
 - **A PR body's screenshots pin their branch.** Images are embedded from a
   `<repo>-<n>--screenshots` side branch, never from the feature branch, so that branch (and its
   worktree) must outlive the PR: deleting it while the PR is open breaks every image in the body.
@@ -367,3 +457,6 @@ against the demo, probe computed styles, and diff against the tracked baseline.
   active maintainer; GitHub no-self-approval); each repo's runbook §6 carries the re-enable
   checklist.
 - The visual-harness scripts remain per-surface/per-repo duplicates — no shared toolkit yet.
+
+*(Ephemeral beads task IDs for followups are not checked in — they live in the gitignored root
+`.agents.local/` sidecar.)*

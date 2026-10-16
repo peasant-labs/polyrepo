@@ -101,6 +101,10 @@ For each ready issue:
 
 When the user requests an epic swarm, use the workspace `aura-swarm start --epic <id>` workflow and its worktree-based agents. Do not launch long-running supervisor or worker Task subagents for an epic. For a small approved set, issue-handler agents can run in parallel as separate lanes.
 
+## Board status
+
+Move the item's `Status` on `peasant-labs` project 4, "Peasant Labs Tracker", as a lane progresses: `In progress` at dispatch, `In review` when the review wave starts, `Done` after the merge. The board is the planning view; issue bodies and pull requests stay authoritative. The workspace guide section "GitHub tracker" carries the commands and the fields that stay empty.
+
 ## Review coordination
 
 Each code-changing PR must complete the issue-handler's three-axis review wave on its current head SHA. Batch completed work for a coordinated review wave when several related lanes finish together, but preserve findings and verdicts per PR.
@@ -170,7 +174,7 @@ After every merge, require the handler to:
 - Prune worktree metadata.
 - Leave the current directory outside the deleted worktree.
 
-Before reporting the approved set complete, verify every issue is closed, every PR is merged, required packages/tags exist, consumer pins use published versions, required screenshots are durable, CI is green, and no handler worktree remains.
+Before reporting the approved set complete, verify every issue is closed, every PR is merged, required packages/tags exist, consumer pins use published versions, required screenshots are durable, CI is green, no handler worktree remains, and every item is `Done` on the tracker board.
 
 ## Hard rules
 

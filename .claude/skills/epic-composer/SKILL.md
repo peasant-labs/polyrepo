@@ -182,16 +182,25 @@ available.
      description. Wait for the answer. Do the same if you only consider creating a label. Do not
      create a label on your own.
 
-8. **Mirror in Beads (only if the project uses Beads)**
+8. **Place on the tracker board**
+   - Add the epic and every created sub-issue to `peasant-labs` project 4, "Peasant Labs
+     Tracker".
+   - Set Status `Backlog`, a Size, and a Team. Set the issue type (`Task`, `Bug`, `Feature`, or
+     `Refactor`). Leave `Priority` and the date fields empty.
+   - Read the field and option ids with `gh project field-list 4 --owner peasant-labs`. The
+     workspace guide section "GitHub tracker" carries the exact commands.
+
+9. **Mirror in Beads (only if the project uses Beads)**
    - Create one Beads epic per GitHub epic. Use the same title and the same priority.
    - Chain `bd dep add <epic> --blocked-by <item>` for every child. Chain
      `bd dep add <later> --blocked-by <earlier>` for every arrow. Set each item's priority.
    - Record each issue URL on its Beads task with `bd comments add`.
    - Leave the user-deferred ledger epic open and untouched.
 
-9. **Report**
+10. **Report**
    - Send one message. Include: the epics with numbers and priorities, the DAG with numbers, the
-     re-homings, the label mapping, and the count of issues created versus retitled. Then stop.
+     re-homings, the label mapping, the board placement (Status/Size/Team), and the count of
+     issues created versus retitled. Then stop.
 
 ## Hard rules
 
@@ -208,3 +217,5 @@ available.
 7. Take labels from the existing inventory. A new label is a question for the user. Never create
    one on your own.
 8. Beads is optional. When used, the mirror carries the same priorities and arrows as GitHub.
+9. Every created epic and issue goes on `peasant-labs` project 4, "Peasant Labs Tracker", with a
+   Status, a Size, a Team, and an issue type. Leave `Priority` and the date fields empty.

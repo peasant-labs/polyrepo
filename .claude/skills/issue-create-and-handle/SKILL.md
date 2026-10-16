@@ -99,6 +99,8 @@ gh issue view "$ISSUE_NUMBER" -R "$GH_REPO" --json number,url,title,assignees
 
 Create cross-repo issues in dependency order, then update their `Blocked by / Blocks` links if an issue number was not known during drafting. Do not add or change scope during this link update.
 
+Then place every created issue on `peasant-labs` project 4, "Peasant Labs Tracker": Status `Backlog`, a Size, a Team, and an issue type. Leave `Priority` and the date fields empty; priority lives in the title. The workspace guide section "GitHub tracker" carries the exact commands.
+
 6. **Dispatch immediately**
    - Load and follow `issue-handler` with both `GH_REPO` and `ISSUE_NUMBER`.
    - The handler owns worktree creation, implementation, repository gates, PR review agents, CI, merge, default-branch sync, and cleanup.
@@ -114,3 +116,4 @@ Create cross-repo issues in dependency order, then update their `Blocked by / Bl
 6. Split work by repository ownership when contract, design-system, backend, or consumer changes have separate landing ceremonies.
 7. Never place sensitive transcript content, tokens, credentials, personal paths, or private repository history in an issue.
 8. After successful creation and assignment, invoke `issue-handler` immediately.
+9. Every created issue goes on `peasant-labs` project 4, "Peasant Labs Tracker", with a Status, a Size, a Team, and an issue type. Leave `Priority` and the date fields empty.
