@@ -6,3 +6,6 @@ args
 unsupported-os
 noninteractive-refusal
 user-local-go
+pnpm-unavailable
+pnpm-older
+pnpm-supported
