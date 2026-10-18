@@ -46,17 +46,12 @@ in the next section. External contributors can install the tools natively.
 |---|---|---|
 | Go | 1.26 (the modules require at least 1.25) | https://go.dev/dl/ or your package manager |
 | Node | 26 | https://nodejs.org/ or a version manager such as `fnm` or `nvm` |
-| pnpm | 11.24.0 | `corepack enable pnpm` (bundled with Node) |
+| pnpm | 11.24.0 | https://pnpm.io/installation |
 
 Every JavaScript repository pins the same pnpm version in the
-`packageManager` field of `package.json`. Corepack ships with Node 26 and
-reads that field, so enable it once and it activates the pinned pnpm for
-you:
-
-```sh
-corepack enable pnpm
-corepack prepare pnpm@11.24.0 --activate
-```
+`packageManager` field of `package.json`. Starting in pnpm v10 and higher,
+the default behaviour is to use this version automatically, downloading it
+if necessary.
 
 After you complete either setup path, run the doctor:
 
@@ -71,6 +66,10 @@ check the native tool versions directly:
 ```sh
 go version && node --version && pnpm --version
 ```
+
+Note: if you have a version manager for Node or pnpm, the doctor script may report
+a version mismatch. You can enter one of the repository worktrees and re-run the
+script to see if it still fails.
 
 ## Core team: the recommended dev shell
 
@@ -170,8 +169,7 @@ FNM_BIN="$HOME/.local/share/fnm/fnm"
 eval "$("$FNM_BIN" env --shell bash)"
 "$FNM_BIN" install 26
 "$FNM_BIN" use 26
-corepack enable pnpm
-corepack prepare pnpm@11.24.0 --activate
+npm install --global pnpm@11.24.0
 ```
 
 The Go SDK lives under `~/.local/share/go`, separate from the default

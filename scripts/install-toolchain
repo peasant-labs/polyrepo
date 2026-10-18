@@ -164,12 +164,10 @@ install_node_and_pnpm() {
   say "  installing Node ${NODE_VERSION}..."
   "$fnm_bin" install "$NODE_VERSION"
   "$fnm_bin" use "$NODE_VERSION"
-  # Corepack ships with Node and reads the pinned pnpm version from each
-  # repository's packageManager field, so activate it instead of a global
-  # npm install.
-  say "  activating pnpm ${PNPM_VERSION} via corepack..."
-  corepack enable pnpm
-  corepack prepare "pnpm@${PNPM_VERSION}" --activate
+  # To reduce the chance of clobbering someone's pnpm install,
+  # install this through the fnm-managed npm instead of curl.
+  say "  installing pnpm ${PNPM_VERSION} via npm..."
+  npm install --global "pnpm@${PNPM_VERSION}"
 }
 
 show_result() {
