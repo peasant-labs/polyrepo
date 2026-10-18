@@ -81,7 +81,7 @@ show_plan() {
   say "  machine        ${os}/${arch}"
   say "  Go             ${go_version} -> ${HOME}/.local/share/go/${go_version}"
   say "  Node           ${NODE_VERSION} -> fnm user install"
-  say "  pnpm           ${PNPM_VERSION} -> active Node ${NODE_VERSION}"
+  say "  pnpm           keep installed 10+; otherwise ${PNPM_VERSION} -> active Node ${NODE_VERSION}"
   say "  profiles       no files will be edited"
   say "  privileges     sudo will not be used"
   say ""
@@ -164,12 +164,17 @@ install_node_and_pnpm() {
   say "  installing Node ${NODE_VERSION}..."
   "$fnm_bin" install "$NODE_VERSION"
   "$fnm_bin" use "$NODE_VERSION"
-  # Corepack ships with Node and reads the pinned pnpm version from each
-  # repository's packageManager field, so activate it instead of a global
-  # npm install.
-  say "  activating pnpm ${PNPM_VERSION} via corepack..."
-  corepack enable pnpm
-  corepack prepare "pnpm@${PNPM_VERSION}" --activate
+  local pnpm_version=""
+  if pnpm_version="$(pnpm --version 2>/dev/null)" &&
+    [[ "$pnpm_version" =~ ^([0-9]+)\. ]] &&
+    (( 10#${BASH_REMATCH[1]} >= 10 )); then
+    say "  pnpm ${pnpm_version} is already installed; keeping it."
+    return 0
+  fi
+  # To reduce the chance of clobbering someone's pnpm install,
+  # install this through the fnm-managed npm instead of curl.
+  say "  installing pnpm ${PNPM_VERSION} via npm..."
+  npm install --global "pnpm@${PNPM_VERSION}"
 }
 
 show_result() {

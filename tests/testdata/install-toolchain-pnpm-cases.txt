@@ -1,0 +1,8 @@
+# name group version exit-code expected-action
+missing unavailable missing 127 install
+failing unavailable 10.0.0 1 install
+invalid unavailable invalid 0 install
+pnpm-9 older 9.15.0 0 install
+pnpm-10 supported 10.0.0 0 keep
+pnpm-11 supported 11.24.0 0 keep
+pnpm-20 supported 20.0.0 0 keep
