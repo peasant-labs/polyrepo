@@ -249,7 +249,9 @@ point-in-time notes allowed are the dated digest at the end of this file.
 - **Shared SxS visual gates compare the canonical fairtrade demo (left/reference) to the current
   consuming app (right)** — never app-to-app unless that is the explicit regression target.
 - **The local app section registry is canonical:** `home | settings` in the nav, then
-  `analytics | changes | code map` by route only, owned by fairtrade (`LOCAL_APP_SECTIONS` in
+  `online` (id `village`, the page of what you have published) `| analytics | changes | code map`
+  by route only. The local app's switcher lists only `local` and `docs`; it reaches the online app
+  through its `collectives ↗` link. The registry is owned by fairtrade (`LOCAL_APP_SECTIONS` in
   `src/ui/inuse/InUseShell.jsx`, each entry `{ id, label, inNav }`; `GRAPH_APP_SECTIONS` is a
   deprecated alias that keeps the earlier three-entry value). Consumers derive their nav and routes
   from it and fail loudly on unknown or unmapped section IDs rather than silently dropping
