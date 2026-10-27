@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: consumer-build-provenance
+expected_outcome: |
+  Checks live worktrees, package manifests, consumer imports, build output, and server
+  configuration as available. Distinguishes unpublished library source, built demo assets,
+  published package versions, and consumer adoption rather than blaming cache by default.
+  Keeps shared transcript components/styles and parsing in Fairtrade; identifies genuinely
+  host-owned wiring without copying canonical implementations into Village. Plans a
+  provenance-verified mounted consumer comparison against the canonical demo in both themes,
+  with enough user turns to overflow the rail. Checks nearest-edge rail scrolling without
+  moving main content or focus, real host slots, and retained routes/exits. Describes release
+  and adoption dependencies without performing unauthorized publication, re-pin, local
+  linking, edits, pushes, or merges, and flags unavailable evidence honestly.

@@ -1,0 +1,11 @@
+schema_version: "1.1"
+name: title-timeline-jiggle
+expected_outcome: |
+  Treats the whole-shell jiggle as unresolved despite accepted action motion and a passing
+  title-height test. Inspects the actual header composition, positioning, reservations,
+  trigger thresholds, and scroller. Plans simultaneous frame measurements of title/header,
+  timeline, toolbar, stream, scroll position, and a content anchor, including frames after
+  completion. Separates presence flashes, duplicate occupied space, anchoring, and threshold
+  feedback as hypotheses rather than claiming a cause without evidence. Verifies served
+  build identity and plans normal/reduced-motion checks. Does not mask the problem by
+  slowing motion, intercepting wheel scrolling, or hiding elements, and makes no edits.

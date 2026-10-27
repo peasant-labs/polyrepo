@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: group-actions-once
+expected_outcome: |
+  Locates canonical Fairtrade viewer, grouping, filter, tool, and thinking code instead of
+  implementing consumer-specific parsing. Defines ownership from stable source user-turn
+  identity before display filtering; places each group's work after its first model prose,
+  addresses groups with no prose, and suppresses all original member work including the
+  host prose turn's work. Keeps action blocks out of turn selection and navigation.
+  Separates default list visibility from individual output state and compact behavior.
+  Preserves the requested unboxed list, boxed outputs, no header divider, Bash input
+  label/prompt, and no redundant calls total. Distinguishes duplicate fixture data from
+  duplicate rendering and does not invent thinking duration. Proposes named fixture and
+  mounted both-theme checks without production edits, publication, push, or merge.

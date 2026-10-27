@@ -1,0 +1,11 @@
+schema_version: "1.1"
+name: disclosure-final-frame
+expected_outcome: |
+  Inspects the actual shared disclosure and distinguishes requested state, DOM presence,
+  and animation ownership. Explains the potential gap between releasing the animation's
+  endpoint and committing hidden state without assuming the defect still exists in the
+  current source. Proposes retaining final styles through the hidden commit, invalidating
+  stale completion callbacks, reversing from painted geometry, and returning open content
+  to natural sizing. Preserves lazy rendering, focus semantics, accepted easing, and
+  reduced motion. Proposes bounded real-browser midpoint, reversal, and post-completion
+  verification rather than endpoint-only screenshots. Makes no production edits or pushes.

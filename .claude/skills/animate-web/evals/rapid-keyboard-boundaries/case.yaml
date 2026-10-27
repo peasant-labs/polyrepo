@@ -1,0 +1,11 @@
+schema_version: "1.1"
+name: rapid-keyboard-boundaries
+expected_outcome: |
+  Inspects current production keyboard and scroll handlers before deciding whether a fix
+  is missing. Distinguishes stale render closures from passive reading-line feedback that
+  overwrites explicit navigation, including targets that cannot align at scroll limits.
+  Proposes a synchronous logical cursor and explicit navigation intent, coalescing obsolete
+  jumps and making logical-boundary repeats harmless. Preserves editable and nested-control
+  keyboard handling, manual wheel/touch/scrollbar/native-key takeover, and session/filter
+  resets. Plans burst, overshoot, reversal, short-turn, and manual-takeover tests without
+  waiting for each jump to finish. Does not modify production files or push anything.

@@ -1,0 +1,11 @@
+schema_version: "1.1"
+name: system-filter-compatibility
+expected_outcome: |
+  Inspects canonical Fairtrade filter evaluation, viewer projection, controls, and controlled
+  state contracts. Treats an absent system key as enabled for older saved and host-controlled
+  objects. Hides only actual system turns and keeps counts, active-filter indication,
+  rechecking, and clear/reset consistent with mounted output. Accounts for selection when
+  its target disappears without conflating system notices with thinking/tool-only turns.
+  Preserves identities, host slots, anchors, tool filtering, and permission-gated exits.
+  Plans named fixture cases and real mounted checks rather than checkbox-state-only tests.
+  Avoids unnecessary wire/schema changes, consumer forks, file edits, and pushes.
