@@ -9,3 +9,7 @@ expected_outcome: |
   feedback as hypotheses rather than claiming a cause without evidence. Verifies served
   build identity and plans normal/reduced-motion checks. Does not mask the problem by
   slowing motion, intercepting wheel scrolling, or hiding elements, and makes no edits.
+  Retains compact transcript identity/context/actions while the hero collapses, and tests timeline
+  pinning and prompt restoration on upward scroll without occlusion or reading-point movement,
+  including mid-long-turn and width reflow. Plans inspectable both-direction video with intermediate
+  frames and exact served-source provenance, distinguishing development from release evidence.

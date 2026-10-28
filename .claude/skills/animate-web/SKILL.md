@@ -33,7 +33,7 @@ while already unavailable to keyboard and assistive technology.
 | Icon or small positional feedback | Existing transform/opacity motion | Moving surrounding layout unnecessarily |
 | Disclosure that moves following content | Existing collapsible; measured height or suitable CSS layout interpolation | Scaling the text; guessed `max-height` ceilings |
 | Interruptible, lazy-mounted output | Presence-aware disclosure using the existing animation stack | Unmounting before exit; eager rendering of every hidden output |
-| Title replaced by pinned chrome | One coordinated layout transition | Independently inserting and removing rows without accounting for their space |
+| Hero compacts into pinned chrome | One coordinated layout transition retaining compact identity | Independently inserting and removing rows without accounting for their space |
 | Deliberate jump to a turn | Native scrolling plus explicit selection intent | Wheel interception or global smooth scrolling as a substitute for fixing state |
 
 Animating height can be appropriate when siblings must genuinely move. Keep measurement
@@ -45,6 +45,11 @@ Do not prescribe a new duration or curve when the project already owns them. Nev
 
 Read [references/disclosure-lifecycle.md](references/disclosure-lifecycle.md) before implementing
 or changing a collapsible region.
+
+For desktop transcript rails, clip fixed-width, fully opaque painted contents with the changing
+grid footprint in both directions; do not fade contents before the width closes. Mobile drawers
+instead slide from their edge with a scrim fade. Other disclosures may use their existing fades.
+See the lifecycle reference for interruption, focus and endpoint semantics.
 
 The critical sequence is:
 
@@ -73,7 +78,7 @@ Do not copy an entire existing component into a second animation implementation.
 ## Coordinate layout and scrolling
 
 Read [references/layout-and-scroll.md](references/layout-and-scroll.md) for title/timeline
-replacement, scroll anchoring, and rapid-key navigation.
+compaction, scroll anchoring, and rapid-key navigation.
 
 - Follow the positions of the **header, replacement row, stream, and first visible content**,
   not just the disappearing title's height. One element can animate monotonically while its
@@ -126,7 +131,9 @@ Respect editable controls, nested keyboard handlers, and `event.defaultPrevented
 6. Avoid test races against a short duration under many workers. Do not fix a race with a longer
    arbitrary sleep or a longer production animation. Record measurements and test the intended
    failure, including completion ownership and cleanup.
-7. Inspect actual screenshots or recordings of the complete mounted surface. A screenshot of
+7. Inspect actual screenshots or recordings of the complete mounted surface, including both motion
+   directions and intermediate frames. Identify exact served source and distinguish development
+   previews from release evidence. A screenshot of
    the docs page instead of the target, or a final still image, does not establish motion quality.
 
 Use the existing browser runner and fixture conventions. Keep cases in fixtures and protect

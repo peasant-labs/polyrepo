@@ -106,6 +106,18 @@ one-frame natural-height flash. Preserve final pixels until hidden state is comm
 Treat the title/timeline/toolbar/stream as coupled layout. Do not report the title transition as
 fixed based only on smooth action disclosure or monotonic height of the title's own wrapper.
 
+> On the desktop, for the sidebar animations, we see that when we collapse them, the contents immediately disappear / fade out, and then the space they previously occupied gets collapsed into. however, when we expand them, they unfurl out, and the content that exists on them is gradually revealed as the sidebar unfurls. they need to be made consistent: the unfurling / furling animation is what should happen. that is, when we collapse them, the contents don't disappear and then the sidebar comes in --- it should be that the contents stay visible while the sidebar furls in.
+
+Check actual fixed-width content remains opaque while the grid clips it at mid-open and mid-close;
+verify focus, inert/aria-hidden, reversal and reduced-motion endpoints. Mobile drawers slide from
+their edges with scrim fade, remain mutually exclusive and do not shift the reader. The mobile
+default has tabs, search and hamburger, with one upward-flush utility row; clipboard success toast
+requires an actual successful copy, and durations do not wrap.
+
+Check hero collapse and restoration in both scroll directions: compact identity/context/actions
+remain, timeline pins without jiggle, delay or occlusion, and the same reading point survives
+header and width reflow even mid-long-turn. Separate user intent from compensation scroll events.
+
 ## Filters and retained behavior
 
 > On the filter sidebar there should be a filter to hide system turns.

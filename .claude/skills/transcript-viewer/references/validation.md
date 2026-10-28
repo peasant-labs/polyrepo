@@ -30,7 +30,9 @@ production mutations run through `scripts/parts-mutations.mjs` with the correspo
 manifest. Header-condense and other focused suites can have their own mutation entry point.
 Inspect the actual runner instead of guessing flags or assuming every suite shares a format.
 
-Before a completed implementation handoff, follow the repository's full gate requirements,
+During interactive design, use HMR and affected focused checks; wait until the consolidated design
+is settled before full applicable gates. Before a completed implementation handoff, follow the
+repository's full gate requirements,
 including `pnpm build`, `pnpm journey:ci`, and library/parts/package checks relevant to the change.
 If a library smoke imports `dist/lib`, build that artifact first. A successful app build does
 not imply library output exists. Do not run conflicting builds against the same output directory.
@@ -65,10 +67,22 @@ worker contention. Resume them to observe completion. Keep the unpaused whole-sh
 a paused component test can miss title/timeline insertion, scroll anchoring, and toolbar movement.
 Record more than height endpoints: include the neighboring geometry and selection state.
 
+Measure actual rail content opacity and fixed width against the changing clip at mid-open and
+mid-close, then check closed accessibility, focus restoration, interruption/reversal and reduced
+motion. Exercise mobile edge-slide/scrim, mutually exclusive drawers and unchanged reading point.
+Measure the hero, compact identity, pinned timeline, toolbar and a mid-long-turn reading anchor
+during downward and upward scrolling and width changes; distinguish user intent from compensation.
+Verify mobile tabs/search/hamburger, one flush utility row, successful-copy toast and nowrap durations.
+
 ## Capture discipline
 
 - Show persistent chrome plus representative mounted content and the control being changed.
 - Include both rendered themes and the affected narrow/desktop layouts.
+- Capture inspectable videos of rail furl/unfurl and header compact/restore in both directions;
+  inspect intermediate frames or a contact sheet, with exact served source provenance. Label dev
+  previews honestly: they do not substitute for release-artifact screenshots or Playwright gates.
+- Local agent-browser exploration is neither CI evidence nor a new required dependency. Desktop
+  emulation does not prove physical touch or Safari behavior.
 - Open the image or recording and inspect it. Check its route, build identity, and target before
   claiming that it demonstrates the fix.
 - Transient captures stay untracked. For a PR, follow the workspace's durable screenshot-hosting

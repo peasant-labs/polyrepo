@@ -1,20 +1,22 @@
 # Coupled layout and scroll intent
 
-## Replacing a title with a pinned timeline
+## Compacting the hero while pinning the timeline
 
-A smooth title collapse is not proof that the replacement is smooth. The title, header padding,
+A smooth hero collapse is not proof that the coordinated layout is smooth. The title, header padding,
 new timeline, turns toolbar, sticky reservation, and scroller can all change geometry at once.
 
 Draw their positions in these states before changing the animation:
 
 ```text
 expanded       transition              condensed
-breadcrumb     breadcrumb              breadcrumb
-title/meta     shrinking title/meta    timeline
-turns toolbar  timeline + reservation  turns toolbar
+compact identity/context/actions remain visible throughout
+hero title     shrinking hero          compact identity
+turns toolbar  timeline + reservation  pinned timeline + toolbar
 stream         moving stream edge      stream
 ```
 
+The large hero may collapse, but compact transcript identity, context and actions remain. The
+pinned timeline and hero restore reversibly on upward scroll without delay, jiggle or occlusion.
 This sketch describes the risk, not a required final layout. Inspect the actual flow model.
 An absolute pinned row plus a new normal-flow spacer can count its height twice. A delayed
 spacer removal can move the content back up after the visually pleasing collapse has finished.
@@ -36,7 +38,9 @@ Potential causes to distinguish:
 Choose an explicit choreography appropriate to the product: shared occupied space, a single
 container transition, or coordinated reservation of the final layout. Do not conceal the defect
 by slowing everything down, fading the entire application, adding delay, or hiding elements from
-the recording. Do not change the user's scrolling intent to accommodate the animation.
+the recording. Do not change the user's scrolling intent to accommodate the animation. Preserve the reading point through width and
+header reflow, including within a long turn; distinguish actual user scroll intent from
+layout-compensation scroll events so neither swallows the other.
 
 ## Keyboard selection versus reading-line selection
 

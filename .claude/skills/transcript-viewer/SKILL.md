@@ -115,10 +115,17 @@ against the current consolidated build, not just the latest changed component.
 
 Read `../animate-web/SKILL.md` for motion implementation and debugging.
 
-Preserve the title/breadcrumb distinction: the large session title can leave while the breadcrumb
-and actions remain. The pinned timeline does not need another copy of the title. Treat the entire
-title/timeline/toolbar/stream geometry as one transition; an individually smooth title does not
-prove the shell no longer jiggles.
+The large hero title may collapse, but compact transcript identity, context and actions remain.
+The timeline pins on downward scroll and reverses on upward scroll without delayed restoration,
+jiggle or occlusion. Treat header/timeline/toolbar/stream geometry as one transition. Preserve
+the reading point through header and width reflow, including mid-long-turn; distinguish logical
+user intent from compensation events rather than swallowing scroll.
+
+Desktop rail content remains fully opaque and fixed-width as the grid clips it in both directions;
+mobile overlay drawers slide from their edges with a scrim fade. Preserve focus, reversal and
+reduced-motion behavior as described in the motion skill. Mobile defaults to tabs, search and a
+hamburger; one upward-flush utility row opens mutually exclusive side drawers. Clipboard success
+shows a transient toast only after actual success, and durations remain on one line.
 
 Keep a requested keyboard selection separate from passive reading-line tracking. Smooth-scroll
 events must not reset it to a previous turn, particularly at clamped top/bottom positions. Bursts
@@ -154,7 +161,7 @@ Read [references/validation.md](references/validation.md) before reporting compl
    mutation does not prove the intended invariant; preserve the intended diagnostic.
 4. Verify computed styles, layout, interactions, and motion in the built app. Check both themes,
    desktop and affected narrow layouts, real nested controls, scroll boundaries, and reduced motion.
-5. Run the repository's required build, contract, parts, library, and Playwright gates from the
+5. Once interactive design is settled and consolidated, run the repository's required build, contract, parts, library, and Playwright gates from the
    exact worktree. Inspect failures rather than assuming a prior green summary still applies.
 6. Inspect captures of the complete mounted shell and representative body. Confirm the served
    assets match the source under review. Storybook supplements, but does not replace, product proof.

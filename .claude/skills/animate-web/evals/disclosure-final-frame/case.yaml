@@ -9,3 +9,6 @@ expected_outcome: |
   to natural sizing. Preserves lazy rendering, focus semantics, accepted easing, and
   reduced motion. Proposes bounded real-browser midpoint, reversal, and post-completion
   verification rather than endpoint-only screenshots. Makes no production edits or pushes.
+  For desktop rails, require actual mid-open and mid-close content at full opacity with fixed
+  width and a changing clip, not an empty fading rail; check focus, inert/aria-hidden endpoints,
+  reversal and reduced motion. Preserve distinct mobile edge-slide/scrim behavior.
