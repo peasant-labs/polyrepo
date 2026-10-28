@@ -130,6 +130,18 @@ point-in-time notes allowed are the dated digest at the end of this file.
   policy, the visibility a repository requires — which is the re-implementation this workspace
   forbids. Copy that restates a consequence names the decision and never becomes the place a rule
   is enforced, so if the server's rule changes the copy is what has to move with it.
+- **No derivable fields in the schema (hard rule).** Never add a wire field whose value a reader
+  can determine from fields it already receives. That covers:
+  - a copy of a value elsewhere in the same response;
+  - a status that the presence of an object already implies;
+  - an echo of a value from the request being answered;
+  - a copy of what an embedded payload already carries.
+
+  Two fields that must agree will one day disagree, and then every reader needs a rule for the
+  mismatch. State the derivation in the doc comment instead, and pin each new object's exact
+  property set in a test so a derivable field can't come back. A field stays only when its
+  reader can't compute it, for example a count only the server holds, or a version that binds a
+  stored result to what produced it.
 
 ## Conventions
 
