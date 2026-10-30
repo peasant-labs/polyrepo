@@ -143,6 +143,16 @@ point-in-time notes allowed are the dated digest at the end of this file.
   reader can't compute it, for example a count only the server holds, or a version that binds a
   stored result to what produced it.
 
+  The cost of deriving counts too. A derivation that needs a lot of memory or time, or one that is
+  complicated to get right, can make a stored field the better tradeoff. Never decide that
+  silently in either direction. Raise it as a discussion point in the issue or PR, and name:
+  - the derivation and what it reads;
+  - its measured or estimated time and memory;
+  - how complicated it is to get right;
+  - the drift risk of storing the result, and what keeps it true (a version, a backfill, a test).
+
+  The same test applies to CLI JSON output and to stored columns, not only to the wire schema.
+
 ## Conventions
 
 - **Worktree naming:** `<primary-repo>-<issue#>--<semantic-commit>--<descriptive-name>`, the
