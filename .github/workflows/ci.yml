@@ -7,7 +7,7 @@ on:
 
 jobs:
   determine-runner:
-    uses: peasant-labs/infra/.github/workflows/runner-router.yml@runner-router-v1
+    uses: peasant-labs/infra/.github/workflows/runner-router.yml@0233bce3b714e3200a63fab0568a9815e8fca72f
     with:
       fallback: '["ubuntu-26.04"]'
     secrets:
