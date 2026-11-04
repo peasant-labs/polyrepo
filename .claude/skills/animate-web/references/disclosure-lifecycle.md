@@ -33,17 +33,19 @@ When a new request arrives:
 A previous close finishing after a new open must not hide the newly opened content. A previous
 open finishing after a new close must not restore it.
 
-## Desktop transcript rails versus mobile drawers
+## Desktop transcript rails versus mobile overlays
 
-For desktop rails, preserve fully opaque, fixed-width painted contents while the grid footprint
-clips them during both unfurl and furl. Independent content fade or early disappearance makes the
+For desktop rails, keep painted contents fully opaque and fixed-width while the occupied footprint
+closes during both unfurl and furl. Independent content fade or early disappearance makes the
 closing motion an empty shrinking rail; reflowing text into slivers is not the intended reveal.
+This holds whether the layout animates its grid columns or reserves fixed tracks and translates the
+rail: not every mode animates columns, and opaque content stays clipped by the occupied footprint.
 Closing can immediately make the painted region inert and aria-hidden after focus returns to its
 trigger. Keep paint until the clipped endpoint, then remove presence; reversal starts at the
 current footprint and stale completion cannot hide reopened content. Reduced motion commits the
-accessible endpoint immediately. Mobile overlay drawers instead slide from their actual edge with
-a scrim fade; retain their focus, interruption and mutually exclusive behavior. Other disclosures
-may retain appropriate opacity fades.
+accessible endpoint immediately. A mobile overlay panel instead slides from the leading edge with
+a scrim fade, preserving its mutually exclusive state, interruption and focus behavior. Other
+disclosures may retain appropriate opacity fades.
 
 ## The end-frame bug
 

@@ -46,10 +46,10 @@ Do not prescribe a new duration or curve when the project already owns them. Nev
 Read [references/disclosure-lifecycle.md](references/disclosure-lifecycle.md) before implementing
 or changing a collapsible region.
 
-For desktop transcript rails, clip fixed-width, fully opaque painted contents with the changing
-grid footprint in both directions; do not fade contents before the width closes. Mobile drawers
-instead slide from their edge with a scrim fade. Other disclosures may use their existing fades.
-See the lifecycle reference for interruption, focus and endpoint semantics.
+For desktop transcript rails, keep painted contents fully opaque and fixed-width while the occupied
+footprint closes; do not fade them before the width closes. A mobile overlay panel instead slides
+from the leading edge with a scrim fade. Other disclosures may keep their existing fades. See the
+lifecycle reference for the normative rail mechanics, interruption, focus and endpoint semantics.
 
 The critical sequence is:
 

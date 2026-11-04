@@ -69,10 +69,13 @@ Record more than height endpoints: include the neighboring geometry and selectio
 
 Measure actual rail content opacity and fixed width against the changing clip at mid-open and
 mid-close, then check closed accessibility, focus restoration, interruption/reversal and reduced
-motion. Exercise mobile edge-slide/scrim, mutually exclusive drawers and unchanged reading point.
-Measure the hero, compact identity, pinned timeline, toolbar and a mid-long-turn reading anchor
-during downward and upward scrolling and width changes; distinguish user intent from compensation.
-Verify mobile tabs/search/hamburger, one flush utility row, successful-copy toast and nowrap durations.
+motion. Exercise the mobile leading-edge panel and scrim, one panel at a time, with an unchanged
+reading point. Measure the hero, the compact breadcrumb/context/actions row, the pinned timeline,
+toolbar and a mid-long-turn reading anchor during downward and upward scrolling and width changes;
+distinguish user intent from compensation. Verify mobile tabs/search/hamburger, one flush utility
+row, a success toast after an actual host utility-row copy, and durations that remain on one line.
+The mobile and utility-row expectations here are interaction-validation guidance, not a quoted user
+report; the transcript viewer skill states them normatively.
 
 ## Capture discipline
 

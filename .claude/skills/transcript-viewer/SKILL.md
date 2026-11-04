@@ -115,17 +115,25 @@ against the current consolidated build, not just the latest changed component.
 
 Read `../animate-web/SKILL.md` for motion implementation and debugging.
 
-The large hero title may collapse, but compact transcript identity, context and actions remain.
-The timeline pins on downward scroll and reverses on upward scroll without delayed restoration,
-jiggle or occlusion. Treat header/timeline/toolbar/stream geometry as one transition. Preserve
-the reading point through header and width reflow, including mid-long-turn; distinguish logical
-user intent from compensation events rather than swallowing scroll.
+The large hero title and its metadata may collapse, but the existing breadcrumb/context/actions
+row remains as compact identity. The timeline pins on downward scroll and reverses without delay
+on upward scroll, without jiggle or occlusion. Treat header/timeline/toolbar/stream geometry as
+one transition. Preserve the reading point through header and width reflow, including
+mid-long-turn; distinguish logical user intent from compensation events rather than swallowing
+scroll.
 
-Desktop rail content remains fully opaque and fixed-width as the grid clips it in both directions;
-mobile overlay drawers slide from their edges with a scrim fade. Preserve focus, reversal and
-reduced-motion behavior as described in the motion skill. Mobile defaults to tabs, search and a
-hamburger; one upward-flush utility row opens mutually exclusive side drawers. Clipboard success
-shows a transient toast only after actual success, and durations remain on one line.
+Desktop rail motion follows the lifecycle reference: opaque, fixed-width content stays painted
+while the occupied footprint closes, whether the layout animates columns or translates over a
+reserved track. A mobile overlay panel instead slides from the leading edge with a scrim fade, one
+panel at a time. Preserve focus, reversal and reduced-motion behavior as described in the motion
+skill.
+
+The mobile and utility-row expectations in this section are interaction-validation guidance, not
+quoted user feedback; this section is their normative product statement. Mobile defaults to tabs,
+search and a hamburger, with one flush utility row. A successful-copy toast belongs to the host
+utility row's copy actions: confirm it follows an actually successful copy rather than assuming
+every copy path already behaves that way. The shared copy anchor updates optimistically, so
+verification should establish that the toast is tied to real success. Durations remain on one line.
 
 Keep a requested keyboard selection separate from passive reading-line tracking. Smooth-scroll
 events must not reset it to a previous turn, particularly at clamped top/bottom positions. Bursts
