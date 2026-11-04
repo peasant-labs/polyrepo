@@ -18,11 +18,10 @@ point-in-time notes allowed are the dated digest at the end of this file.
   **Default branches:** peasant, village, schema → `develop` (peasant/village reserve `main` for
   releases); fairtrade, redact, transcript-browser → `main`.
 - **`flake.nix` + `.envrc` (direnv)** — the Nix devShell.
-- **This guide is one file with aliases:** `CLAUDE.md` and `CONTRIBUTING.md` are symlinks to
-  `AGENTS.md` (at the workspace root and in `polyrepo/`), and the workspace-root guide and
-  `polyrepo/AGENTS.md` are kept byte-identical. Edit the real `AGENTS.md` only: writing through a
-  link, or editing a file you believe is a second copy, writes the same bytes again and
-  duplicates the section.
+- **This guide is the shared contributor copy.** `CLAUDE.md` and `CONTRIBUTING.md` are symlinks to
+  this file. The workspace-root `AGENTS.md` is the maintainer's personal setup and may diverge from
+  this one; do not assume the two are byte-identical. Edit the real file you mean — writing through
+  a symlink writes the target, and treating the two copies as mirrors duplicates sections.
 - **`.beads/`** — shared Beads task DB, prefix `plabs`; run `bd` from this root. Work runs the
   *pasture* 12-phase epoch protocol (full reference: the `protocol` skill docs).
 - **Beads service boundary (hard rule): NEVER run `bd dolt start` or `bd dolt stop`.** If Beads
@@ -32,11 +31,11 @@ point-in-time notes allowed are the dated digest at the end of this file.
 - **`PRODUCT.md`** — the workspace product record (users, purpose, positioning, constraints,
   principles) that the `impeccable` skill reads before any UI work. Fairtrade carries its own
   `PRODUCT.md` for the design system and points back here for end-user truth.
-- **Remotes (peasant): `origin` = `peasant-labs/peasant-prerelease-archive` (frozen pre-launch
-  history), `canonical` = `peasant-labs/peasant` (live).** Bare `gh pr/issue <n>` resolves
-  against the archive, whose numbering overlaps the live repo — always pass
-  `-R peasant-labs/peasant`, push to `canonical`, and hand subagents a local git range, never a
-  bare PR number. Issue numbers written before 2026-08 (anywhere) are archive numbering.
+- **Remotes (peasant, village): `origin` = the live repository (`peasant-labs/peasant`,
+  `peasant-labs/village`).** The prerelease archive is frozen pre-launch history and is no longer
+  configured; add it under a distinct remote name if its history is ever needed. Issue numbers
+  written before 2026-08 (anywhere) are archive numbering — resolve one with
+  `-R peasant-labs/<archive-repo>`, and hand subagents a local git range, never a bare PR number.
 
 ## The core repos
 
