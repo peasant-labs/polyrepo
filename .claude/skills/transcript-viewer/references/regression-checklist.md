@@ -106,6 +106,22 @@ one-frame natural-height flash. Preserve final pixels until hidden state is comm
 Treat the title/timeline/toolbar/stream as coupled layout. Do not report the title transition as
 fixed based only on smooth action disclosure or monotonic height of the title's own wrapper.
 
+> On the desktop, for the sidebar animations, we see that when we collapse them, the contents immediately disappear / fade out, and then the space they previously occupied gets collapsed into. however, when we expand them, they unfurl out, and the content that exists on them is gradually revealed as the sidebar unfurls. they need to be made consistent: the unfurling / furling animation is what should happen. that is, when we collapse them, the contents don't disappear and then the sidebar comes in --- it should be that the contents stay visible while the sidebar furls in.
+
+Check actual fixed-width content remains opaque while the occupied footprint clips it at mid-open
+and mid-close, whether columns animate or the rail translates over reserved tracks; verify focus,
+inert/aria-hidden, reversal and reduced-motion endpoints. A mobile overlay panel slides from the
+leading edge with scrim fade, one at a time, without shifting the reader; the mobile default is
+tabs, search and a hamburger over one upward-flush utility row. A success toast must follow a
+successful copy action in the host utility row, and durations remain on one line. The mobile and
+utility-row items are interaction-validation guidance, not a quoted user report; the transcript
+viewer skill states them normatively.
+
+Check hero collapse and restoration in both scroll directions: the breadcrumb/context/actions row
+remains as compact identity, the timeline pins on downward scroll and restores without delay on
+upward scroll without jiggle or occlusion, and the same reading point survives header and width
+reflow even mid-long-turn. Separate user intent from compensation scroll events.
+
 ## Filters and retained behavior
 
 > On the filter sidebar there should be a filter to hide system turns.

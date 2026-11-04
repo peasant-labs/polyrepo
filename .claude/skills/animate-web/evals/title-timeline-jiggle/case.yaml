@@ -9,3 +9,10 @@ expected_outcome: |
   feedback as hypotheses rather than claiming a cause without evidence. Verifies served
   build identity and plans normal/reduced-motion checks. Does not mask the problem by
   slowing motion, intercepting wheel scrolling, or hiding elements, and makes no edits.
+  Retains the existing breadcrumb/context/actions row as compact identity while the large hero
+  title collapses, so the pinned timeline does not become a second copy of the title. Checks that
+  the timeline pins on downward scroll and the hero/timeline restore without delay on upward
+  scroll, with no occlusion, jiggle or reading-point movement, including mid-long-turn and width
+  reflow, and distinguishes user scroll intent from layout-compensation events. Plans inspectable
+  both-direction video with intermediate frames and exact served-source provenance,
+  distinguishing development from release evidence.
