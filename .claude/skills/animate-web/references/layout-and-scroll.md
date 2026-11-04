@@ -1,20 +1,24 @@
 # Coupled layout and scroll intent
 
-## Replacing a title with a pinned timeline
+## Compacting the hero while pinning the timeline
 
-A smooth title collapse is not proof that the replacement is smooth. The title, header padding,
+A smooth hero collapse is not proof that the coordinated layout is smooth. The title, header padding,
 new timeline, turns toolbar, sticky reservation, and scroller can all change geometry at once.
 
 Draw their positions in these states before changing the animation:
 
 ```text
-expanded       transition              condensed
-breadcrumb     breadcrumb              breadcrumb
-title/meta     shrinking title/meta    timeline
-turns toolbar  timeline + reservation  turns toolbar
-stream         moving stream edge      stream
+expanded        transition               condensed
+breadcrumb      breadcrumb               breadcrumb
+hero title/meta shrinking hero/meta      pinned timeline
+turns toolbar   timeline + reservation   toolbar
+stream          moving stream edge       stream
 ```
 
+In all three states, the existing breadcrumb/context/actions row remains visible as compact
+identity. The hero is the large title/metadata region, not the persistent chrome: it may collapse,
+but the pinned timeline does not need another copy of the title. The timeline pins on downward
+scroll; the hero and timeline restore without delay on upward scroll, without jiggle or occlusion.
 This sketch describes the risk, not a required final layout. Inspect the actual flow model.
 An absolute pinned row plus a new normal-flow spacer can count its height twice. A delayed
 spacer removal can move the content back up after the visually pleasing collapse has finished.
@@ -36,7 +40,9 @@ Potential causes to distinguish:
 Choose an explicit choreography appropriate to the product: shared occupied space, a single
 container transition, or coordinated reservation of the final layout. Do not conceal the defect
 by slowing everything down, fading the entire application, adding delay, or hiding elements from
-the recording. Do not change the user's scrolling intent to accommodate the animation.
+the recording. Do not change the user's scrolling intent to accommodate the animation. Preserve the
+reading point through width and header reflow, including within a long turn; distinguish actual
+user scroll intent from layout-compensation scroll events so neither swallows the other.
 
 ## Keyboard selection versus reading-line selection
 
