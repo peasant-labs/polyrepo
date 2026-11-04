@@ -112,10 +112,10 @@ Check actual fixed-width content remains opaque while the occupied footprint cli
 and mid-close, whether columns animate or the rail translates over reserved tracks; verify focus,
 inert/aria-hidden, reversal and reduced-motion endpoints. A mobile overlay panel slides from the
 leading edge with scrim fade, one at a time, without shifting the reader; the mobile default is
-tabs, search and a hamburger over one flush utility row. A success toast must follow an actual copy
-of the host utility row, and durations stay on one line. The mobile and utility-row items are
-interaction-validation guidance, not a quoted user report; the transcript viewer skill states them
-normatively.
+tabs, search and a hamburger over one upward-flush utility row. A success toast must follow a
+successful copy action in the host utility row, and durations remain on one line. The mobile and
+utility-row items are interaction-validation guidance, not a quoted user report; the transcript
+viewer skill states them normatively.
 
 Check hero collapse and restoration in both scroll directions: the breadcrumb/context/actions row
 remains as compact identity, the timeline pins on downward scroll and restores without delay on

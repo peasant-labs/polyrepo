@@ -72,10 +72,11 @@ mid-close, then check closed accessibility, focus restoration, interruption/reve
 motion. Exercise the mobile leading-edge panel and scrim, one panel at a time, with an unchanged
 reading point. Measure the hero, the compact breadcrumb/context/actions row, the pinned timeline,
 toolbar and a mid-long-turn reading anchor during downward and upward scrolling and width changes;
-distinguish user intent from compensation. Verify mobile tabs/search/hamburger, one flush utility
-row, a success toast after an actual host utility-row copy, and durations that remain on one line.
-The mobile and utility-row expectations here are interaction-validation guidance, not a quoted user
-report; the transcript viewer skill states them normatively.
+distinguish user intent from compensation. Verify mobile tabs/search/hamburger, one upward-flush
+utility row, a success toast after an actual successful copy action in the host utility row, and
+durations that remain on one line. The mobile and utility-row expectations here are
+interaction-validation guidance, not a quoted user report; the transcript viewer skill states them
+normatively.
 
 ## Capture discipline
 

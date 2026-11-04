@@ -36,8 +36,9 @@ open finishing after a new close must not restore it.
 ## Desktop transcript rails versus mobile overlays
 
 For desktop rails, keep painted contents fully opaque and fixed-width while the occupied footprint
-closes during both unfurl and furl. Independent content fade or early disappearance makes the
-closing motion an empty shrinking rail; reflowing text into slivers is not the intended reveal.
+reveals or clips them during both unfurl and furl. Independent content fade or early disappearance
+makes the closing motion an empty shrinking rail; reflowing text into slivers is not the intended
+reveal.
 This holds whether the layout animates its grid columns or reserves fixed tracks and translates the
 rail: not every mode animates columns, and opaque content stays clipped by the occupied footprint.
 Closing can immediately make the painted region inert and aria-hidden after focus returns to its
