@@ -18,6 +18,20 @@ This skill mirrors the Go discipline used in this workspace's `internal/defaults
 a const set, an ordered `AllX` set, a `NewX`/`parseX` boundary, and a `String()` method. The
 JavaScript version keeps those properties without TypeScript enums.
 
+## Terms
+
+- **Nominal type** — a type distinct from every other type with the same structure. TypeScript is
+  structural, so nominal safety needs a marker.
+- **Brand** — the type-only marker that creates a nominal type. It can be a unique symbol, a
+  literal property, or a private class field. The same pattern is called an opaque type, a tagged
+  type, or a newtype. The brand is erased at runtime.
+- **Branded primitive** — a primitive plus a brand, such as `PageToken`.
+- **Closed value** — a frozen singleton object carrying its `wire` value and `label`. It is
+  nominal by object identity and its literal `wire`; it needs no brand. Do not call it a branded
+  type.
+- **Branded class** — a class with a private brand field, so a structural object literal cannot
+  stand in for it.
+
 ## The rule
 
 One definition site. Zero raw literals downstream.
@@ -44,8 +58,8 @@ the `ClosedValue` shape onto a private helper that needs none of it.
 
 ## ClosedValue: the enum without the enum
 
-A branded string cannot carry a method. Use a frozen singleton object that carries the wire
-value, its label, and the serialization hooks.
+A branded primitive is still a string at runtime and cannot carry a method. Use a frozen
+singleton object that carries the wire value, its label, and the serialization hooks.
 
 ```ts
 export interface ClosedValue<W extends string | number, L extends string> {
@@ -119,7 +133,7 @@ closed('sessions', 'sessions', { icon: List, ordered: true })
 ## Parse at the boundary, never cast
 
 The wire value enters the program once, at a URL, a message, a CLI flag, or a host prop. Convert
-it there. Every later layer receives the branded value.
+it there. Every later layer receives the typed value.
 
 ```ts
 const BROWSE_BY_WIRE: Readonly<Record<string, BrowseView>> = Object.freeze({
@@ -220,7 +234,7 @@ The wire contract belongs to the schema package. The client set is a projection,
 definition.
 
 - A set that crosses repositories is owned by the schema. Consumers map wire values to their
-  branded values in one module.
+  typed values in one module.
 - A set that is UI policy (page sizes offered by a table, grouping modes) is owned by the shared
   UI package or the app, once.
 - Assert both directions with type tests:
@@ -282,7 +296,7 @@ the same typed values from the shared table; they do not re-map strings.
 
 | Go | JavaScript / TypeScript |
 |---|---|
-| `type Mode string` | branded `Mode` type over `ClosedValue` |
+| `type Mode string` | nominal `Mode` type (closed value) |
 | `ModeList Mode = "list"` | `List: closed('list', 'list')` |
 | `AllModes` | `ALL_MODES` |
 | `NewMode(raw) (Mode, error)` | `parseMode(raw): Mode` |
@@ -297,7 +311,7 @@ instances. It is not correct when the cases are raw member literals.
 
 Run this against the changed files, not the whole repository:
 
-- [ ] Every public prop, URL parameter, wire field, and error path uses the branded type.
+- [ ] Every public prop, URL parameter, wire field, and error path uses the nominal type.
 - [ ] No downstream `case 'literal'`, `=== 'literal'`, or `Record<string, …>` as the type of a
       closed set. A boundary lookup table keyed by the wire value is allowed.
 - [ ] The member literal appears only in the definition module.

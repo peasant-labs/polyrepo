@@ -289,7 +289,7 @@ point-in-time notes allowed are the dated digest at the end of this file.
 - **JavaScript/TypeScript API work goes through `javascript-api-design`:** whenever you write or
   change an API in JavaScript or TypeScript — a component prop, a hook result, a URL contract, a
   wire adapter, a page parameter, or an error model — load
-  `.claude/skills/javascript-api-design/SKILL.md`. Closed sets are branded `ClosedValue`
+  `.claude/skills/javascript-api-design/SKILL.md`. Closed sets are nominal closed-value
   constants parsed at the boundary, never raw member literals downstream. Do not use `enum` for
   a public or shared set, do not compare a closed set with a raw string, do not cast at a
   boundary, and do not scan a closed set or rebuild its tables in a render path. The skill's
