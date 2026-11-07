@@ -286,6 +286,14 @@ point-in-time notes allowed are the dated digest at the end of this file.
   Where the two conflict (fonts, the heading scale, motion defaults), fairtrade's documented
   invariants win until a change is ratified in fairtrade first. Install the skill per user from
   impeccable.style.
+- **JavaScript/TypeScript API work goes through `javascript-api-design`:** whenever you write or
+  change an API in JavaScript or TypeScript — a component prop, a hook result, a URL contract, a
+  wire adapter, a page parameter, or an error model — load
+  `.claude/skills/javascript-api-design/SKILL.md`. Closed sets are branded `ClosedValue`
+  constants parsed at the boundary, never raw member literals downstream. Do not use `enum` for
+  a public or shared set, do not compare a closed set with a raw string, do not cast at a
+  boundary, and do not scan a closed set or rebuild its tables in a render path. The skill's
+  Go-parity table and review checklist are the gate.
 - Workers should commit early and commit often using atomic commits and conventional commit messages.
 
 ## GitHub tracker (Peasant Labs Tracker)
