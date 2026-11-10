@@ -43,7 +43,7 @@ A cross-repo outcome normally needs one issue per owning repository with explici
    - State current behavior with concrete source locations when known.
    - State user impact and the smallest owned scope.
    - Define observable acceptance criteria, production-path tests, fixture expectations, visual proof, and cross-repo order.
-   - Use `[P1]`, `[P2]`, or `[P3]` in the title only when repository practice or the user supplies priority.
+   - Require a Priority on every issue. The scale is in the workspace guide section "GitHub tracker" (`P0` through `P3`). Do not put a `[Pn]` tag in the title. An epic title is `[Epic] <title>`. A plain issue title is `<title>`. Ask the user when the priority is not clear from repository practice or the request.
    - Peasant-labs issues use normal Markdown sections and explicit GitHub references.
 
 Use this body shape:
@@ -81,8 +81,8 @@ For an epic, add a children table with priority, issue, and blocked-by columns, 
    - Combinatorial cases belong in named YAML fixture rows with required-name manifests, not count guards.
 
 4. **Refine and approve**
-   - Present the exact repository, proposed title, and complete issue body.
-   - Ask for corrections or explicit approval.
+   - Present the exact repository, proposed title, Priority, and complete issue body.
+   - Ask for corrections or explicit approval. Ask for the Priority when it is not clear from repository practice or the request.
    - Present a revised draft after any material change.
    - Do not create any issue until the user explicitly approves the current draft and, for a cross-repo set, the full issue set and dependency order.
 
@@ -99,7 +99,7 @@ gh issue view "$ISSUE_NUMBER" -R "$GH_REPO" --json number,url,title,assignees
 
 Create cross-repo issues in dependency order, then update their `Blocked by / Blocks` links if an issue number was not known during drafting. Do not add or change scope during this link update.
 
-Then place every created issue on `peasant-labs` project 4, "Peasant Labs Tracker": Status `Backlog`, a Size, a Team, and an issue type. Leave `Priority` and the date fields empty; priority lives in the title. The workspace guide section "GitHub tracker" carries the exact commands.
+Then place every created issue on `peasant-labs` project 4, "Peasant Labs Tracker". Set Priority with `setIssueFieldValue`, Status `Backlog`, a Size, a Team, and an issue type. Leave the date fields empty. The workspace guide section "GitHub tracker" carries the exact commands.
 
 6. **Dispatch immediately**
    - Load and follow `issue-handler` with both `GH_REPO` and `ISSUE_NUMBER`.
@@ -108,7 +108,7 @@ Then place every created issue on `peasant-labs` project 4, "Peasant Labs Tracke
 
 ## Hard rules
 
-1. Never create an issue without approval of its exact repository, title, and current body.
+1. Never create an issue without approval of its exact repository, title, Priority, and current body.
 2. Never create a duplicate issue or PR.
 3. Never use bare issue numbers when repository identity can be ambiguous.
 4. Always assign the created issue to the authenticated GitHub login; never guess a username.
@@ -116,4 +116,4 @@ Then place every created issue on `peasant-labs` project 4, "Peasant Labs Tracke
 6. Split work by repository ownership when contract, design-system, backend, or consumer changes have separate landing ceremonies.
 7. Never place sensitive transcript content, tokens, credentials, personal paths, or private repository history in an issue.
 8. After successful creation and assignment, invoke `issue-handler` immediately.
-9. Every created issue goes on `peasant-labs` project 4, "Peasant Labs Tracker", with a Status, a Size, a Team, and an issue type. Leave `Priority` and the date fields empty.
+9. Every created issue has a Priority (`P0` through `P3`; ask when it is not clear) and goes on `peasant-labs` project 4, "Peasant Labs Tracker", with that Priority, a Status, a Size, a Team, and an issue type. Leave the date fields empty. Do not put a `[Pn]` tag in the title.

@@ -317,32 +317,64 @@ point-in-time notes allowed are the dated digest at the end of this file.
 repo's issues land on. Every epic and every sub-issue goes on it, including a cross-repo child. An
 issue that is not on the board is invisible to planning.
 
-Set three fields on every issue, and Iteration when the work belongs to a named push.
+Set Priority, Status, Size, and Team on every issue and every epic. Set Iteration when the work
+belongs to a named push.
 
 | field | values | when |
 |---|---|---|
+| Priority | `P0: Urgent` · `P1: High` · `P2: Medium` · `P3: Low` | at creation, on every issue and every epic |
 | Status | `Backlog` · `Ready` · `In progress` · `In review` · `Done` | `Backlog` at creation; the only field with a lifecycle |
 | Size | `XS` · `S` · `M` · `L` · `XL` | at creation, from the scope |
 | Team | `UI / UX` · `Data Pipelines` · `Village` · `Research` | at creation, from the owning surface |
 | Iteration | configured schedule (`NeurIPS Push` from 2026-10-24, `Iteration 3` from 2026-11-26, …) | when the work is committed to that push; check the live schedule, never assume |
 
-**`Priority` stays empty.** Its single-select has no options configured, so priority lives in the
-issue title (`[P2] <title>`, `[P3][Epic] <title>`). `Estimate`, `Start date`, and `Target date` are
-unused.
+**Priority** is an organization issue field (id `IFSS_kgDOAl-p-g`). It is the record of priority.
+The board shows it. `gh project item-edit` and `updateProjectV2ItemFieldValue` cannot set it.
+`updateProjectV2Field` refuses it ("Only custom fields can be updated"). The project field query
+returns Priority with `options: []`. Read the option ids from the org issue field, then set the
+value on the issue.
+
+The scale:
+
+- **P0** (`P0: Urgent`): blocks users now.
+- **P1** (`P1: High`): next.
+- **P2** (`P2: Medium`): planned.
+- **P3** (`P3: Low`): when convenient.
+
+An epic's priority equals its highest child's.
+
+New titles carry no `[Pn]` prefix. An epic is `[Epic] <title>`. A plain issue is `<title>`. On
+2026-11-10 the Priority field was backfilled from existing `[P0]`..`[P3]` title tags, and those
+titles were left unchanged. An older title may still carry a tag. The field is authoritative when
+they disagree. Do not edit an old title just to remove the tag.
+
+The org also has issue fields `Effort`, `Start date`, and `Target date`. Leave those empty.
+`Estimate` stays empty.
 
 **Issue type** comes from the org's set — `Task`, `Bug`, `Feature`, `Refactor` — chosen by
 substance. An epic keeps the `epic` label as well; the label and the type are separate axes.
 
-`gh project field-list` prints `configuration: null`, so it cannot supply option ids. Read them
-from GraphQL; `item-add` is idempotent, which also returns the item id for an issue already on the
-board.
+`gh project field-list` prints `configuration: null`, so it cannot supply option ids. Read
+single-select option ids and the iteration schedule from GraphQL. `item-add` is idempotent, which
+also returns the item id for an issue already on the board.
 
 ```sh
 R=peasant-labs/schema; N=155                     # the issue to place
 ITEM=$(gh project item-add 4 --owner peasant-labs \
   --url "https://github.com/$R/issues/$N" --format json --jq .id)
 
+# Priority option ids (org issue field). Do not read these from the project.
+gh api graphql -f query='{ organization(login:"peasant-labs") { issueFields(first:20) { nodes { __typename ... on IssueFieldSingleSelect { id name options { id name } } } } } }'
+
+# set Priority. Node id: gh api repos/$R/issues/$N --jq .node_id
+# field id IFSS_kgDOAl-p-g; option id from the query above
+gh api graphql -f query='mutation { setIssueFieldValue(input:{issueId:"<issue-node-id>", issueFields:{fieldId:"IFSS_kgDOAl-p-g", singleSelectOptionId:"<option-id>"}}) { clientMutationId } }'
+
+# read Priority on an issue. The value name is one of the scale names above.
+gh api graphql -f query='{ repository(owner:"peasant-labs", name:"<repo>") { issue(number:<n>) { issueFieldValues(first:20) { nodes { ... on IssueFieldSingleSelectValue { name field { ... on IssueFieldSingleSelect { name } } } } } } } }'
+
 # live field ids + option ids (Status / Size / Team), and the iteration schedule
+# Priority appears here with options: []. Do not set it with item-edit.
 gh api graphql -f query='
 query { organization(login:"peasant-labs") { projectV2(number:4) { fields(first:50) {
   nodes { __typename

@@ -50,15 +50,16 @@ available.
      coverage gaps", "test-infrastructure hardening". Group by the concern the items change. Do
      not group by repo. Do not group by who found the item. A cleanup-only group is allowed at
      the lowest priority.
-   - Prioritize the epic and every item. Scale: P0 blocks users now. P1 is next. P2 is planned.
-     P3 is when convenient. The epic's priority equals its highest item. Inside an epic, the first
-     one or two items matter. The rest are improvements. Give one sentence of reason for each
-     call that is not obvious.
+   - Prioritize the epic and every item. The scale is in the workspace guide section "GitHub
+     tracker". The epic's priority equals its highest item. Inside an epic, the first one or two
+     items matter. The rest are improvements. Give one sentence of reason for each call that is
+     not obvious.
    - Order into a DAG. For every pair of items ask: must one finish before the other is correct
      or cheap? Typical arrows: a decision before the work it scopes. A shared helper before its
      callers. A producer-side change before a consumer re-run. A data-integrity fix before a count
      that depends on it. Items with no arrow are independent. Say so.
-   - Titles: epics `[P1][Epic] <title>`. Issues `[P2] <title>`.
+   - Titles carry no `[Pn]` prefix. An epic is `[Epic] <title>`. A plain issue is `<title>`. Set
+     the priority in the Priority field.
 
 3. **Refine and approve the structure**
    - Present one context message in ASD-STE100 with an ASCII diagram. Include: the epics, every
@@ -146,7 +147,7 @@ available.
      ## Problem
      The `session_origin` column ...
      BODY
-     gh issue create -R <o>/<r> --title '[P2] <title>' --body-file body.md
+     gh issue create -R <o>/<r> --title '<title>' --body-file body.md
      # form 2: single quotes, no expansion at all
      gh issue comment <n> -R <o>/<r> --body 'Run `make check`. The `$HOME` path is not expanded.'
      ```
@@ -156,9 +157,9 @@ available.
    - Existing issue: retitle it and append the addendum. Build a merged file. Never splice inline.
      ```sh
      { gh issue view <n> -R <o>/<r> --json body --jq .body; printf '\n\n'; cat addendum.md; } > merged.md
-     gh issue edit <n> -R <o>/<r> --title '[P3] <title>' --body-file merged.md
+     gh issue edit <n> -R <o>/<r> --title '<title>' --body-file merged.md
      ```
-   - Epic: `gh issue create -R <o>/<r> --title '[P2][Epic] <title>' --body-file epic.md --label epic`.
+   - Epic: `gh issue create -R <o>/<r> --title '[Epic] <title>' --body-file epic.md --label epic`.
    - Relations. Sub-issues and blocked-by both work across repositories within one owner.
      Verified 2026-08-26: `peasant-labs/schema#82` is a sub-issue of a peasant epic, and
      `peasant-labs/village#48` is blocked by `peasant-labs/peasant#193`. State each cross-repo
@@ -189,10 +190,11 @@ available.
 8. **Place on the tracker board**
    - Add the epic and every created sub-issue to `peasant-labs` project 4, "Peasant Labs
      Tracker".
-   - Set Status `Backlog`, a Size, and a Team. Set the issue type (`Task`, `Bug`, `Feature`, or
-     `Refactor`). Leave `Priority` and the date fields empty.
-   - Read the field and option ids with `gh project field-list 4 --owner peasant-labs`. The
-     workspace guide section "GitHub tracker" carries the exact commands.
+   - Set Priority on the issue with `setIssueFieldValue`. Set Status `Backlog`, a Size, and a
+     Team. Set Iteration when the work is committed to a named push. Set the issue type (`Task`,
+     `Bug`, `Feature`, or `Refactor`). Leave the date fields empty.
+   - Read ids with GraphQL, not `gh project field-list`. The workspace guide section "GitHub
+     tracker" carries the exact commands.
 
 9. **Mirror in Beads (only if the project uses Beads)**
    - Create one Beads epic per GitHub epic. Use the same title and the same priority.
@@ -203,8 +205,8 @@ available.
 
 10. **Report**
    - Send one message. Include: the epics with numbers and priorities, the DAG with numbers, the
-     re-homings, the label mapping, the board placement (Status/Size/Team), and the count of
-     issues created versus retitled. Then stop.
+     re-homings, the label mapping, the board placement (Priority/Status/Size/Team), and the count
+     of issues created versus retitled. Then stop.
 
 ## Hard rules
 
@@ -213,8 +215,8 @@ available.
 2. Do not create an epic that already exists. Do not duplicate an open issue. Re-home instead.
 3. Keep the approved scope. If you find an ambiguity after approval, refine and get approval
    again before you change anything.
-4. Every epic and every item carries a priority in its title. Every arrow in the DAG becomes a
-   native blocked-by relation. State the arrow in the body too.
+4. Every epic and every item has a Priority. Titles carry no `[Pn]` prefix. Every arrow in the
+   DAG becomes a native blocked-by relation. State the arrow in the body too.
 5. Pass bodies through a file or a single-quoted argument. Never use a double-quoted argument.
    Read every posted body back.
 6. Write cross-repo references as `owner/repo#N`. Put no internal task taxonomy in any body.
@@ -222,4 +224,5 @@ available.
    one on your own.
 8. Beads is optional. When used, the mirror carries the same priorities and arrows as GitHub.
 9. Every created epic and issue goes on `peasant-labs` project 4, "Peasant Labs Tracker", with a
-   Status, a Size, a Team, and an issue type. Leave `Priority` and the date fields empty.
+   Priority, a Status, a Size, a Team, and an issue type. Set Iteration when the work is committed
+   to a named push. Leave the date fields empty.
