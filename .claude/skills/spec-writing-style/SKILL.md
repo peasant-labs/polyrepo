@@ -138,6 +138,64 @@ discussed".
 Reviewers need the big picture before reviewing one piece. Give them the order
 to read in, the order to review in, and what must land before what.
 
+## Milestones come from elicitation
+
+A milestone is a scope decision, not a design decision. Elicit it, do not infer
+it from the work you already have in mind.
+
+### The two-question bisection
+
+Ask these before writing any milestone, in this order:
+
+1. **End vision.** "Which capabilities should this support eventually, including
+   capabilities that can come later?" Every option is a real capability with its
+   consequence. The answer is usually all of them; that is fine, because it is
+   not a commitment.
+2. **This delivery.** "Which outcomes must this delivery actually deliver?
+   Selecting only the reviewed design means stopping before implementation."
+   Multi-select. The gap between the two answers is the deferral set.
+
+A third question closes it: **confirm the deferrals.** "Is anything else
+required before we draft?" An unconfirmed deferral is a scope leak.
+
+Do not ask elicitation to choose architecture, storage, or interfaces. Ask what
+the user must be able to do, and what they must be able to see. Those are the
+inputs a milestone is made of.
+
+### Turning answers into milestones
+
+- **One selected outcome maps to one milestone**, unless two outcomes cannot be
+  demonstrated separately. Then they are one milestone, and the document says
+  why.
+- **A milestone is defined by what a person can do or see when it lands**, not by
+  the code that changed. "Pull a teammate's transcripts and see whose they are"
+  is a milestone. "Add an owner column" is a task inside one.
+- **Every milestone carries a demonstration**: the smallest end-to-end act that
+  proves it. If you cannot name one, the milestone is not scoped yet.
+- **Every milestone names its exclusions.** Not only the initiative-level
+  out-of-scope list: what this slice deliberately leaves to a later milestone.
+- **Every deferral gets a reason and an unblock condition.** "Later" is not a
+  reason. "Needs the transfer ledger, which needs the audit epic" is.
+- **Date drivers select milestones, they do not create them.** A workshop or a
+  release names the subset that must be demo-ready; the rest keeps its order and
+  loses its urgency, not its scope.
+- **A foundation milestone is allowed** when a later milestone cannot be
+  demonstrated without it, but it still needs a demonstration of its own:
+  compilable stubs that refuse with a real error, or a contract that consumers
+  can pin.
+
+### Writing it down
+
+In the umbrella, the milestone table is the scope record:
+
+| milestone | what a person can do when it lands | demo | depends on |
+|---|---|---|---|
+
+In the URD, keep three separate lists: selected outcomes, deferred outcomes, and
+explicitly excluded work. Then cross-check: every requirement in the URD maps to
+a milestone or to a deferral row. A requirement that maps to neither is a
+finding.
+
 ## Body shape
 
 Use these sections unless the subject gives a reason not to.
@@ -201,6 +259,11 @@ question: what does each reference answer that the new document does not?
 - [ ] Every decided statement is attributed; open questions are in their own
       section.
 - [ ] At least one diagram shows the concept map.
+- [ ] Milestones came from elicitation: end vision, this-delivery selection, and
+      a confirmed deferral set.
+- [ ] Every milestone names what a person can do when it lands and one
+      end-to-end demonstration.
+- [ ] Every URD requirement maps to a milestone or a deferral row.
 - [ ] The out-of-scope list names deferrals and their unblock conditions.
 - [ ] The contract-before-consumer path is stated wherever a contract is
       involved.
