@@ -70,6 +70,10 @@ available.
    - Do not write bodies for posting before the structure is approved.
 
 4. **Draft the bodies**
+   - Load `.claude/skills/spec-writing-style/SKILL.md` first. It owns the design-record style: the
+     umbrella / milestone / proposal layer model, high-level-but-concrete milestones,
+     decided-versus-open separation, explicit exclusions, sequencing, and the worked examples to
+     match. This step keeps only the mechanical posting rules.
    - Language rules (hard):
      - ASD-STE100. Short sentences. Active voice. One idea per sentence. Imperative steps. Plain
        words. Em-dashes are allowed.
