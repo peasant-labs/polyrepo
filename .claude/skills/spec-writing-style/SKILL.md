@@ -298,8 +298,8 @@ question: what does each reference answer that the new document does not?
       involved.
 - [ ] Reading order and merge dependencies are present.
 - [ ] No internal task IDs, slice names or phase taxonomy in the body.
-- [ ] The tracker board carries the issue, its size, its team, and its iteration
-      when the work belongs to a named push.
+- [ ] The tracker board carries the issue, its Priority, its size, its team, and
+      its iteration when the work belongs to a named push.
 - [ ] A developer with no prior context could write a proposal from this alone.
 
 ## Boundary with epic-composer

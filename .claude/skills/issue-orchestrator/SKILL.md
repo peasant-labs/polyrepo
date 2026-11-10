@@ -85,7 +85,7 @@ Priority order:
 1. User-selected issue or release-critical blocker.
 2. Security, privacy, data-loss, broken production behavior, and failing baseline work.
 3. Lowest-level dependency that unlocks the most approved work.
-4. Repository priority in issue titles, `P1` before `P2` before `P3`.
+4. The issue Priority field, `P0` before `P1` before `P2` before `P3`. Read the field, not a title tag.
 5. Lowest issue number as a stable tie-breaker.
 
 The default parallelism cap is four lanes. Lower it when gates are resource-heavy, cross-repo releases serialize work, or semantic conflicts reduce safe concurrency.
@@ -103,7 +103,7 @@ When the user requests an epic swarm, use the workspace `aura-swarm start --epic
 
 ## Board status
 
-Move the item's `Status` on `peasant-labs` project 4, "Peasant Labs Tracker", as a lane progresses: `In progress` at dispatch, `In review` when the review wave starts, `Done` after the merge. The board is the planning view; issue bodies and pull requests stay authoritative. The workspace guide section "GitHub tracker" carries the commands and the fields that stay empty.
+Move the item's `Status` on `peasant-labs` project 4, "Peasant Labs Tracker", as a lane progresses: `In progress` at dispatch, `In review` when the review wave starts, `Done` after the merge. The board is the planning view; issue bodies and pull requests stay authoritative. The workspace guide section "GitHub tracker" carries the commands.
 
 ## Review coordination
 
