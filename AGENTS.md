@@ -274,14 +274,24 @@ point-in-time notes allowed are the dated digest at the end of this file.
   closed when either side is missing or blank.
 - **Shared SxS visual gates compare the canonical fairtrade demo (left/reference) to the current
   consuming app (right)** — never app-to-app unless that is the explicit regression target.
-- **The local app section registry is canonical:** `home | settings` in the nav, then
-  `online` (id `village`, the page of what you have published) `| analytics | changes | code map`
-  by route only. The local app's switcher lists only `local` and `docs`; it reaches the online app
-  through its `collectives ↗` link. The registry is owned by fairtrade (`LOCAL_APP_SECTIONS` in
-  `src/ui/inuse/InUseShell.jsx`, each entry `{ id, label, inNav }`; `GRAPH_APP_SECTIONS` is a
-  deprecated alias that keeps the earlier three-entry value). Consumers derive their nav and routes
-  from it and fail loudly on unknown or unmapped section IDs rather than silently dropping
-  sections. Binding until a replacement is user-ratified and lands in Fairtrade first.
+- **App chrome is fairtrade's `AppSidebar`, not a section strip.** `AppSidebar` +
+  `AppSidebarLayout` (`src/ui/AppSidebar.jsx`) is the one sidebar for every app screen, in an order
+  the component enforces: brand mark, the host's page groups, shortcuts (search, docs, links that
+  leave the app), then a footer row (account, settings gear, theme). A `settings` item is lifted
+  into the gear. A settings page's own sections live in `SettingsNav` / `SettingsLayout` in the
+  page body. Below 768px the same nav is a drawer.
+- **`LOCAL_APP_SECTIONS` is the local app's route registry, not the online app's nav.** It lives
+  in fairtrade `src/ui/inuse/InUseShell.jsx`, each entry `{ id, label, inNav }`: `home` and
+  `settings` are `inNav`; `village` (label `online`), `analytics`, `changes`, and `map` (label
+  `code map`) keep their ids and are reachable by route only. `GRAPH_APP_SECTIONS` is a deprecated
+  alias that keeps the earlier three-entry value. Peasant derives its routes from the registry
+  (`web/src/lib/nav/sections.ts`) and throws on a section id it does not know. Peasant's mounted
+  `LocalSidebar` links only the `inNav` sections, and fairtrade turns `settings` into the gear, so
+  the sidebar's page list is `home`; search, docs, and `collectives ↗` are shortcuts. Route-only
+  sections and `/share` appear in neither the sidebar nor the command palette, and `/review` is
+  still the `changes` route. Village does not import the registry: its signed-in sidebar is
+  host-owned (`home`, `discover`, `pull requests`, `collectives`, plus the settings gear). A change
+  to the registry or the sidebar order is ratified in fairtrade first.
 - **UI work goes through impeccable ([impeccable.style](https://impeccable.style/)):** every
   UI/UX task (wireframes, shaping, a new surface, a redesign, polish, critique, audit) runs
   through the `impeccable` skill. Run its `context` setup first, then the matching command:
