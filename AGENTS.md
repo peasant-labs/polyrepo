@@ -302,28 +302,43 @@ point-in-time notes allowed are the dated digest at the end of this file.
 repo's issues land on. Every epic and every sub-issue goes on it, including a cross-repo child. An
 issue that is not on the board is invisible to planning.
 
-Set three fields. Leave every other field empty.
+Set three fields on every issue, and Iteration when the work belongs to a named push.
 
 | field | values | when |
 |---|---|---|
 | Status | `Backlog` · `Ready` · `In progress` · `In review` · `Done` | `Backlog` at creation; the only field with a lifecycle |
 | Size | `XS` · `S` · `M` · `L` · `XL` | at creation, from the scope |
 | Team | `UI / UX` · `Data Pipelines` · `Village` · `Research` | at creation, from the owning surface |
+| Iteration | configured schedule (`NeurIPS Push` from 2026-10-24, `Iteration 3` from 2026-11-26, …) | when the work is committed to that push; check the live schedule, never assume |
 
 **`Priority` stays empty.** Its single-select has no options configured, so priority lives in the
-issue title (`[P2] <title>`, `[P3][Epic] <title>`). `Estimate`, `Iteration`, `Start date`, and
-`Target date` are unused.
+issue title (`[P2] <title>`, `[P3][Epic] <title>`). `Estimate`, `Start date`, and `Target date` are
+unused.
 
 **Issue type** comes from the org's set — `Task`, `Bug`, `Feature`, `Refactor` — chosen by
 substance. An epic keeps the `epic` label as well; the label and the type are separate axes.
+
+`gh project field-list` prints `configuration: null`, so it cannot supply option ids. Read them
+from GraphQL; `item-add` is idempotent, which also returns the item id for an issue already on the
+board.
 
 ```sh
 R=peasant-labs/schema; N=155                     # the issue to place
 ITEM=$(gh project item-add 4 --owner peasant-labs \
   --url "https://github.com/$R/issues/$N" --format json --jq .id)
-gh project field-list 4 --owner peasant-labs     # Status / Size / Team with their option ids
+
+# live field ids + option ids (Status / Size / Team), and the iteration schedule
+gh api graphql -f query='
+query { organization(login:"peasant-labs") { projectV2(number:4) { fields(first:50) {
+  nodes { __typename
+    ... on ProjectV2SingleSelectField { name id options { id name } }
+    ... on ProjectV2IterationField { name id configuration { iterations { id title startDate } } } } } } } }' \
+  --jq '.data.organization.projectV2.fields.nodes[] | select(.name != null) | {name, options, iterations: .configuration.iterations}'
+
 gh project item-edit --project-id PVT_kwDOD8oAWc4BmST0 --id "$ITEM" \
-  --field-id <field-id> --single-select-option-id <option-id>   # repeat once per field
+  --field-id <field-id> --single-select-option-id <option-id>   # repeat once per single-select field
+gh project item-edit --project-id PVT_kwDOD8oAWc4BmST0 --id "$ITEM" \
+  --field-id <iteration-field-id> --iteration-id <iteration-id> # only for committed-push work
 
 # issue type (GraphQL); read the org's type ids first
 gh api graphql -f query='{ organization(login:"peasant-labs"){ issueTypes(first:20){ nodes { id name } } } }'
