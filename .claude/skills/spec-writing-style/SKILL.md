@@ -121,6 +121,31 @@ One milestone equals one production code path plus its user-visible surface. Two
 independently shippable surfaces are two milestones. Dependencies are native
 blocking edges, not prose.
 
+### 9a. Each milestone merges on its own
+
+A milestone is the unit of a pull request. When it is done, it merges into the
+default branch, and the epic has made progress. Do not hold finished milestones
+on an integration branch and land the epic as one large PR at the end: the code
+base moves fast, a long-lived branch rots, and its final review is too big to
+read.
+
+- **Scope each milestone so its PR is safe to merge alone.** The default branch
+  stays releasable after every milestone lands.
+- **Unfinished user surfaces stay unreachable, not broken.** If a milestone ships
+  backend work before its UI, the UI entry point is absent or behind an existing
+  setting. It is never a half-working screen.
+- **Contract and migration order is part of the split.** A schema change is its
+  own PR and tag before the milestone that consumes it. A migration lands with
+  the first milestone that writes the new state, never earlier "to get it in".
+- **One milestone, one PR by default.** Splitting a milestone into several PRs
+  needs a reason (a contract tag in another repo, a stack the reviewer asked
+  for). Batching several milestones into one PR is the failure this rule
+  prevents. The workspace's CI budget favors one solid PR per milestone over many
+  small ones; it does not favor one PR per epic.
+- **The milestone issue states its merge dependencies** in the same three parts
+  as a PR body: what must land first, whether it is safe to merge alone, and what
+  breaks if it merges too early.
+
 ### 10. Sequencing is part of the content
 
 Order milestones so each one is useful on its own. Name what unblocks what. If
@@ -172,6 +197,8 @@ inputs a milestone is made of.
   is a milestone. "Add an owner column" is a task inside one.
 - **Every milestone carries a demonstration**: the smallest end-to-end act that
   proves it. If you cannot name one, the milestone is not scoped yet.
+- **Every milestone is mergeable on its own** (principle 9a). If a slice only
+  becomes safe once a later slice lands, the two are one milestone.
 - **Every milestone names its exclusions.** Not only the initiative-level
   out-of-scope list: what this slice deliberately leaves to a later milestone.
 - **Every deferral gets a reason and an unblock condition.** "Later" is not a
@@ -264,6 +291,8 @@ question: what does each reference answer that the new document does not?
 - [ ] Every milestone names what a person can do when it lands and one
       end-to-end demonstration.
 - [ ] Every URD requirement maps to a milestone or a deferral row.
+- [ ] Every milestone is one PR that is safe to merge alone, and states its
+      merge dependencies.
 - [ ] The out-of-scope list names deferrals and their unblock conditions.
 - [ ] The contract-before-consumer path is stated wherever a contract is
       involved.
