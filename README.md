@@ -245,6 +245,11 @@ Read [`docs/architecture.md`](docs/architecture.md) to learn why the
 project exists, how Peasant and Village connect, where the shared
 libraries fit, and which repository should own your first change.
 
+Read [`docs/engineering-tenets.md`](docs/engineering-tenets.md) before you
+write code in any repository. It states how we design and write code:
+where values and rules live, how derived data stays correct, how input is
+parsed, how we approach performance, and how we test.
+
 Read [`CONTRIBUTING.md`](CONTRIBUTING.md) for the workspace rules,
 cross-repository contract ceremony, testing discipline, and landing
 conventions.

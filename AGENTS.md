@@ -27,6 +27,11 @@ point-in-time notes allowed are the dated digest at the end of this file.
 - **Beads service boundary (hard rule): NEVER run `bd dolt start` or `bd dolt stop`.** If Beads
   reports its Dolt service unavailable or needing intervention, stop Beads work and let the user
   handle the service — no restarts, repairs, or lifecycle workarounds.
+- **`docs/engineering-tenets.md`** — how code is designed and written in every repo: typed
+  defaults, closed sets, one owner per decision, contract ownership, no derivable state, generated
+  output, versioned and provenanced derived data, boundaries that keep unknown input as unknown,
+  performance, tests and fixtures, and tokens. It is written for human contributors; agents follow
+  it too. Repo guides add repo-specific rules on top of it.
 - **`llm/`** — cross-repo, LLM-facing planning docs (fairtrade adoption playbooks, research).
 - **`PRODUCT.md`** — the workspace product record (users, purpose, positioning, constraints,
   principles) that the `impeccable` skill reads before any UI work. Fairtrade carries its own
