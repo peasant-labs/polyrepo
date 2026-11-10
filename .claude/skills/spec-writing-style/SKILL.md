@@ -1,9 +1,13 @@
 ---
-name: epic-authoring
-description: Write an epic or milestone issue that another developer can pick up and take through requirements, design, test cases and implementation without re-interviewing the requester. Covers the three layers (umbrella, milestone, proposal), vocabulary, data shapes, public interfaces, wire-state checks, validation plans, decided-versus-open separation, exclusions, diagrams, reading order and merge dependencies. Use when filing an epic, umbrella issue, roadmap milestone, or any multi-repo initiative, or when reviewing whether a high-level description carries enough decided scope to hand off. Complements epic-composer: that skill groups items and posts them; this skill decides what the bodies say.
+name: spec-writing-style
+description: Write a spec record — an epic, umbrella issue, milestone issue, proposal or design note — so another developer can pick it up and take it through requirements, design, test cases and implementation without re-interviewing the requester. Covers the three layers (umbrella, milestone, proposal), vocabulary, data shapes, public interfaces, wire-state checks, validation plans, decided-versus-open separation, exclusions, diagrams, reading order and merge dependencies. Use when writing or reviewing any high-level description that must carry enough decided scope to hand off.
 ---
 
-# Epic authoring
+# Spec writing style
+
+A spec record is the epic, umbrella, milestone, proposal or design note that
+carries a decision from a conversation into work. This skill is the style for
+writing one.
 
 ## Audience and goal
 
@@ -208,7 +212,15 @@ question: what does each reference answer that the new document does not?
 
 ## Boundary with epic-composer
 
-`epic-composer` groups items, gets approval, posts the issues, wires sub-issues
-and blocked-by edges, labels them, and places them on the board. This skill
-governs what the bodies say and how they are shaped. Use both: compose the set
-first, then author each body against the principles here.
+`epic-composer` owns the process: group the items, get approval, post the issues,
+wire sub-issues and blocked-by edges, label them, place them on the board. It
+also carries mechanical posting rules: sentence-level language rules, cross-repo
+reference form, `--body-file` quoting, read-back verification.
+
+This skill owns the design record: the layer model, high-level-but-concrete
+milestones, decided-versus-open separation, exclusions, diagrams, sequencing,
+reading order and merge dependencies.
+
+Where the two overlap — issue body sections and the diagram requirement — this
+skill is the fuller statement. When they disagree, follow this skill and update
+`epic-composer` so the two do not drift.
