@@ -39,6 +39,9 @@ technology labels in the diagrams instead of standalone boxes.
 | `website` | Public project website and installer delivery. | `website/AGENTS.md` |
 | `polyrepo` | Checkout, synchronization, toolchain setup, and contributor orientation. | `README.md` |
 
+[`engineering-tenets.md`](engineering-tenets.md) states how code is designed and written in every
+repository.
+
 Wire-contract changes land and receive a `schema` tag before consumers update their pins. Redaction
 engine changes follow the same tag-before-repin rule. User-interface consumers adopt fairtrade;
 they do not redefine its transcript rendering or design tokens.
