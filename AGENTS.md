@@ -235,6 +235,24 @@ point-in-time notes allowed are the dated digest at the end of this file.
   lockfiles) merge the SOURCE, keep the target's generator config, and RE-RUN the generator —
   committed output must be byte-identical to fresh codegen under the pinned generator version
   (zero-diff regen).
+- **A clean merge is not a reviewed merge: read what you merge in, even without a conflict.**
+  Before merging the default branch (or any branch) into a feature or integration branch:
+  1. Read the incoming commits: `git log --oneline HEAD..<incoming>`.
+  2. List the files both sides changed since they split:
+     ```sh
+     base=$(git merge-base HEAD <incoming>)
+     comm -12 <(git diff --name-only "$base" <incoming> | sort) \
+              <(git diff --name-only "$base" HEAD | sort)
+     ```
+  3. Read the incoming diff of every overlapping file (`git diff "$base" <incoming> -- <file>`).
+  4. Decide how each overlap interacts with this branch's changes, and say so in the merge record:
+     a changed signature or return shape, a new check or refusal on a path this branch also
+     changed, a version or pin both sides move.
+
+  Then merge, build, and run the focused tests for the overlapping packages before pushing.
+  Git only detects textual conflicts. A merge that applies cleanly can still break the build or
+  change behaviour, for example an incoming error path written against a return shape this branch
+  changed, or an incoming refusal that lands inside a flow this branch reordered.
 - **Release tooling is partly duplicated across peasant + schema** (`scripts/update-nix-vendor-hash.sh`,
   release-pr/release workflows; release-guard is single-sourced in the schema module and tooled by
   peasant, and fairtrade carries its own JS guard). When touching one copy, diff the sibling.
