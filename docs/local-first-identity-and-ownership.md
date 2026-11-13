@@ -3,7 +3,7 @@
 Status: design record for `peasant-labs/polyrepo#71`, with child issues
 `peasant-labs/peasant#890` (Milestone A) and `peasant-labs/peasant#891`
 (Milestone B). The rulings below are settled and bind
-`peasant-labs/peasant#951` (store, CLI and migration V76) and
+`peasant-labs/peasant#951` (store, CLI and migration V79) and
 `peasant-labs/schema#219` (Local API contract).
 
 ## Authority and scope
@@ -242,7 +242,7 @@ way to start a new owner.
 
 ## Storage
 
-Migration V76 is the next slot in the live source. It adds:
+Migration V79 is the next slot in the live source. (V76 was the next slot when this record was first written; the search-trigger repair, turn-count marker and harness widening landed first as V76–V78. The number is always selected from live source at implementation time.) It adds:
 
 ```sql
 CREATE TABLE local_owner (
@@ -493,11 +493,11 @@ result fields. No body repeats the HTTP status.
 
 ### Versions
 
-After the `peasant-labs/schema#222` release, the released pair is Local 0.36.0 /
-Types 0.48.0. This change moves to **Local 0.37.0 / Types 0.49.0**. Retire
-0.36.0 / 0.48.0 in `retired_specs.yaml` with their pinned hashes and regenerate;
-do not mutate the retired specs. `peasant-labs/schema#219` currently targets the
-older pair and must move before it re-pins a consumer.
+The released pair has moved past Local 0.36.0 / Types 0.48.0: 0.37.0 /
+0.49.0 and 0.38.0 / 0.50.0 shipped while this record was in review. The next
+free pair at implementation time is **Local 0.39.0 / Types 0.51.0**.
+`peasant-labs/schema#219` targets that pair and freezes 0.38.0 / 0.50.0 in
+`retired_specs.yaml` with its pinned hashes; do not mutate a retired spec.
 
 The schema change is additive: a schema release, followed by consumer re-pins.
 Until the schema tag exists, consumers co-develop with a local `go.work` and
@@ -554,7 +554,7 @@ Additional required proofs:
   local owner id and `createdAt` from `local-owner.json`.
 - Rebuild limit: after the same rebuild, assert the claim log is empty and every
   artifact pointer is `NULL`.
-- `TestMigrationV76AddsLocalOwnerAndClaimLog` proves that each of these fails: a
+- `TestMigrationV79AddsLocalOwnerAndClaimLog` proves that each of these fails: a
   second `local_owner` insert, `UPDATE local_owner`, `DELETE local_owner`,
   `INSERT OR REPLACE` into `owner_claims`, `UPDATE owner_claims`, and `DELETE
   owner_claims`.
@@ -589,7 +589,7 @@ Additional required proofs:
   rulings here are settled. V76 is immutable once shipped, so a wrong
   automatic-claim rule or DDL cannot be corrected forward-only.
 - `peasant-labs/schema#219` waits for this record. It must not merge until the
-  rulings here are settled and it has moved to Local 0.37.0 / Types 0.49.0.
+  rulings here are settled and it has moved to Local 0.39.0 / Types 0.51.0.
 - Both implementation PRs stay draft until this record merges. If either lands
   first, it ships behavior this record does not authorize, and the other must
   redo its contract or migration.
@@ -631,13 +631,13 @@ Container diagram: peasant
 |  | peasant backend           |<-- reads and claims ownership (HTTP) --| peasant web               | |
 |  | [Container: Go]           |                                        | [Container: Next.js 15]   | |
 |  | Runs the user commands,   |                                        | Claim control on the      | |
-|  | the prompt, and ingest.   |                                        | Local API 0.37.0.         | |
+|  | the prompt, and ingest.   |                                        | Local API 0.39.0.         | |
 |  +---------------------------+                                        +---------------------------+ |
 |        |              |                                                                             |
 |        |              +-- reads account, records prompt (JSON files) ---------+                     |
 |        |                                                                      |                     |
 |        | appends claims, sets owner                                           |                     |
-|        | pointers (SQL, migration V76)                                        |                     |
+|        | pointers (SQL, migration V79)                                        |                     |
 |        v                                                                      v                     |
 |  +---------------------------+                                        +---------------------------+ |
 |  | peasant session store     |                                        | account and prompt files  | |
@@ -654,6 +654,6 @@ Key:
   Arrow = one relationship, read as "source, label (technology), target".
 ```
 
-This record rules the store arrow (V76) and the web arrow (Local API 0.37.0).
+This record rules the store arrow (V76) and the web arrow (Local API 0.39.0).
 The store claim path writes only local state; the web claim route can surface a
 Village credential or scope lookup timeout as 504.
