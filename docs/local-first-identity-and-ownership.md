@@ -35,7 +35,7 @@ permission to keep the older text.
 | What does unlinking mean? | This step ships no unlink. Reassignment is all-or-nothing; the log proves which accounts claimed and when, not what each entry covered. | Decision 3 |
 | Where does owner permanence live? | In `local-owner.json` beside the store, adopted on rebuild. The claim log does not survive a rebuild. | Decision 7 |
 | What does the web need? | Three local routes with fixed controls, request bodies, prompt states, entry/result fields, error statuses, a 100-entry read bound, and automatic-entry reuse. | Web |
-| What does V76 do to the parent-state trigger? | Drops and recreates `sessions_parent_state_au` with `owner_claim_id`, at a per-row cost. | Storage |
+| What does V79 do to the parent-state trigger? | Drops and recreates `sessions_parent_state_au` with `owner_claim_id`, at a per-row cost. | Storage |
 | What keys the prompt decision? | Local owner id plus the normalized account scope. | Decision 6 |
 | What is the authority and the named-case set? | `peasant-labs/polyrepo#71` and its child issues; the renamed reassignment case and `user-claim-json-parity` are named. | Authority; named cases |
 | What is the merge order? | This record settles first and is safe alone; the two implementation PRs wait and stay draft. | Merge dependencies |
@@ -123,7 +123,7 @@ each claim covered.
 - `claim --all` and the web claim-all control are explicit reassignments. They
   are documented and labelled as such. They do not delete history.
 - Recovering a single person's rows after a shared-machine reassignment requires
-  a later additive coverage table or termination record. Neither is in V76.
+  a later additive coverage table or termination record. Neither is in V79.
 - Lost or revoked Village access grants nothing. The claim remains evidence
   only.
 
@@ -316,7 +316,7 @@ entry use the scope-order index.
 
 ### Parent-state trigger redefinition
 
-V76 adds `sessions.owner_claim_id`, so the exhaustive parent-state trigger is
+V79 adds `sessions.owner_claim_id`, so the exhaustive parent-state trigger is
 dropped and recreated with that column in its `UPDATE OF` list:
 
 ```sql
@@ -351,7 +351,7 @@ table rewrite. The migration carries the full V73 body; only the changed
 `UPDATE OF` list is shown here.
 
 The next migration number is selected from live source at implementation time;
-at the time of writing it is V76. The migration is forward-only and immutable
+at the time of writing it is V79. The migration is forward-only and immutable
 once shipped. `baseline_schema.sql` is regenerated from the migration chain.
 
 ## CLI
@@ -574,7 +574,7 @@ Additional required proofs:
   schema.
 - `baseline_schema.sql` is regenerated from the migration chain.
 - The exact-name schema catalog, migration-slot registry, predecessor pin and
-  hardcoded head-version assertions move to V76 in the same change.
+  hardcoded head-version assertions move to V79 in the same change.
 - The migration comment records that the claim FK joins the
   collective-observation scope cache and that a claimed scope row is permanent;
   claim code never deletes a scope row.
@@ -586,7 +586,7 @@ Additional required proofs:
 - Nothing must merge before this record. It is documentation only: it changes
   no code, contract or migration, and is safe to merge on its own.
 - `peasant-labs/peasant#951` waits for this record. It must not merge until the
-  rulings here are settled. V76 is immutable once shipped, so a wrong
+  rulings here are settled. V79 is immutable once shipped, so a wrong
   automatic-claim rule or DDL cannot be corrected forward-only.
 - `peasant-labs/schema#219` waits for this record. It must not merge until the
   rulings here are settled and it has moved to Local 0.39.0 / Types 0.51.0.
@@ -599,7 +599,7 @@ Additional required proofs:
 ## Out of scope
 
 - A per-artifact unlink, coverage table, or termination record. A termination
-  record is additive later; nothing in V76 prevents it.
+  record is additive later; nothing in V79 prevents it.
 - Comments on other people's transcripts.
 - Fork or continuation of another person's transcript.
 - Review requests and delegation chains.
@@ -654,6 +654,6 @@ Key:
   Arrow = one relationship, read as "source, label (technology), target".
 ```
 
-This record rules the store arrow (V76) and the web arrow (Local API 0.39.0).
+This record rules the store arrow (V79) and the web arrow (Local API 0.39.0).
 The store claim path writes only local state; the web claim route can surface a
 Village credential or scope lookup timeout as 504.
