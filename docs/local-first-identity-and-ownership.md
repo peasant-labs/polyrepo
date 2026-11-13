@@ -590,9 +590,10 @@ Additional required proofs:
   automatic-claim rule or DDL cannot be corrected forward-only.
 - `peasant-labs/schema#219` waits for this record. It must not merge until the
   rulings here are settled and it has moved to Local 0.39.0 / Types 0.51.0.
-- Both implementation PRs stay draft until this record merges. If either lands
-  first, it ships behavior this record does not authorize, and the other must
-  redo its contract or migration.
+- Both implementation PRs are ready for review. The maintainers decide the
+  merge order. The rulings here still govern them: if either lands first, it
+  must match this record, and the other must follow rather than redo a contract
+  or migration in a different shape.
 - The schema release follows schema#219; the peasant re-pin follows the schema
   tag. Neither blocks merging this record.
 
