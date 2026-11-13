@@ -231,9 +231,10 @@ the file atomically; it does not create the owner lazily on first read.
 A database rebuild that deletes `peasant.db` keeps `local-owner.json`. The new
 store adopts the same id and `createdAt`; the creation time is the original, not
 the rebuild time. The claim log does not survive a database rebuild: a rebuilt
-store starts unclaimed, and the next explicit claim appends the first entry.
-The peasant recovery hints that tell people to delete the database must say
-both: the owner id file is retained, and the claim log is not.
+store starts unclaimed, and the first claim after the rebuild appends the first
+entry (automatic only for a new artifact, otherwise explicit). The peasant
+recovery hints that tell people to delete the database must say both: the owner
+id file is retained, and the claim log is not.
 
 A corrupt or unreadable `local-owner.json` is an error that names the path; the
 store does not silently mint a second owner. Deleting the file is the documented
