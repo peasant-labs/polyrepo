@@ -1,9 +1,9 @@
 ---
-name: release-package
+name: release-automation
 description: Explain and operate the peasant-labs release mechanism. Covers the release-intent title grammar (`type(scope)[level]: subject`), the computed-version planner, the standing `automation/release` bot PR, the batched native merge queue, the App-authenticated tag, the tag-triggered GitHub Release and package publish, and the generator that owns CHANGELOG.md. Use whenever a task involves releasing a peasant-labs repo, cutting a release by hand, writing or judging a PR title, updating CHANGELOG.md, debugging why no release PR or tag appeared, or reading `release-intent`, `release-batch.yml`, `cut-release.yml`, `RELEASE_BATCH_MODE`, or `verify-tag`.
 ---
 
-# release-package
+# release-automation
 
 This is the operating guide for how peasant-labs repositories release. The
 short version: **titles carry intent, the tool computes every number, one
