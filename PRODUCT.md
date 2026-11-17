@@ -58,9 +58,9 @@ Peasant-labs shows the agent session that produced a code change, matched to the
   - `standard` is the only level offered.
   - Unknown categories fail closed.
 - **Visibility.** A transcript is private, shared with collectives, or public.
-- **Audience for this overhaul: collectives only.** Publishing from the local web shares a transcript with the collectives the developer picks. The public commons is hidden in the UI, not deleted.
+- **Audience.** Publishing targets the developer's own profile and/or one or more collectives. This overhaul's local-web publish UI shares with the collectives the developer picks; the public commons is hidden in the UI, not deleted.
 - **Publishing works like sharing a document.** Publish and update open one popup that shows what leaves the machine (the redaction check) and who can read it (the collectives). An update keeps the audience the transcript already has unless the developer changes it there. Removing a collective revokes its members' access.
-- **Licenses.** Only `CC0-1.0`, `CC-BY-4.0`, and `CC-BY-SA-4.0` are offered, and a granted license cannot be revoked. A license is asked for only when something becomes public, so the collectives-only flow does not ask for one.
+- **Licenses.** Only `CC0-1.0`, `CC-BY-4.0`, and `CC-BY-SA-4.0` are offered, and a granted license cannot be revoked. A collective carries the license its owner sets at creation, which members consent to when they join. A per-transcript license is asked for only when something becomes public; the collectives-only publish popup does not ask for one.
 - **PR linking.**
   - A PR author links transcripts by commenting `/peasant attach` on the pull request, then confirming the preview.
   - Automatic linking when a PR opens is a personal setting on village, off by default. Each author decides for their own transcripts.
