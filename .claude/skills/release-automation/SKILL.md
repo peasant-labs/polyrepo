@@ -140,6 +140,20 @@ and the release job rebuilds it. A tag without a matching section fails the
 tag-triggered notes job. Never hand-edit the file. Full rules and examples:
 `references/changelog.md`.
 
+## Homebrew cask
+
+Peasant's cask publishes from `peasant-labs/homebrew-tap`, not from the release
+workflow. The tap renders `templates/peasant.rb.tmpl` from the latest final
+release's public `checksums.txt` on a fifteen-minute schedule, audits the result
+on macOS, and pushes with its own workflow token, so peasant holds no tap
+credential. Release candidates never reach the tap.
+
+The final-tag `macos-cask-smoke` waits up to sixteen minutes for the tap to
+carry the tagged version before installing. A tap that never catches up still
+fails the smoke; it is not weakened to install an older package. The tap is a
+generated-artifact repository outside the merge queue: its publisher pushes only
+its own `main`, and the cask file is never edited by hand.
+
 ## Cutting a release by hand
 
 Use this when there is nothing pending but a release is still wanted, or to
