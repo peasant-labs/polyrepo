@@ -3,8 +3,29 @@
 Status: design record for `peasant-labs/polyrepo#71`, with child issues
 `peasant-labs/peasant#890` (Milestone A) and `peasant-labs/peasant#891`
 (Milestone B). The rulings below are settled and bind
-`peasant-labs/peasant#951` (store, CLI and migration V79) and
+`peasant-labs/peasant#951` (store, CLI and migration V82) and
 `peasant-labs/schema#219` (Local API contract).
+
+## Requester rulings (2026-11-18)
+
+These rulings supersede earlier rulings where they differ. They are applied in
+this record and in `peasant-labs/polyrepo#71`; `peasant-labs/schema#219` and
+`peasant-labs/peasant#951` are checked against them.
+
+| Topic | Requester's ruling |
+|---|---|
+| Sessions first stored while active | "harvest/claiming should properly claim active sessions though." |
+| A claim that finds nothing | "'Explicit claims append, so an explicit claim that claimed nothing still records its decision.' should be the correct contract." |
+| Account switch and back | "yes: strict reuse. will be the only way we actually have a replayable, durable event stream in the 'durable objects' sense." |
+| Claim-log order | "newest first, with an 'older' cursor. want this to be performant too: similar to optimizations we made to improve migration performance." |
+| Unlink | "yeah, unlink can be left for later. accept narrowing." |
+| Notice for signed-in installs | "This notice is okay. web and hook notices or UIs can come later." |
+
+The derived rulings follow in decisions 1-7: "first stored" is defined by
+evidence (decision 4), reuse is strict (decision 4), the log is newest first and
+read N+1 (decision 4 and Storage), the owner file carries integer milliseconds
+and refuses a mismatch (decision 7), and a later unlink is an additive
+termination table (decision 3).
 
 ## Authority and scope
 
@@ -31,13 +52,15 @@ permission to keep the older text.
 
 | Question | Ruling | Where |
 |---|---|---|
-| Which artifacts may an automatic claim cover? | Only artifacts the run stored for the first time (`DiffNew` sessions and newly created annotations). Every non-new row waits for an explicit claim. | Decision 4; named cases |
-| What does unlinking mean? | This step ships no unlink. Reassignment is all-or-nothing; the log proves which accounts claimed and when, not what each entry covered. | Decision 3 |
-| Where does owner permanence live? | In `local-owner.json` beside the store, adopted on rebuild. The claim log does not survive a rebuild. | Decision 7 |
-| What does the web need? | Three local routes with fixed controls, request bodies, prompt states, entry/result fields, error statuses, a 100-entry read bound, and automatic-entry reuse. | Web |
-| What does V79 do to the parent-state trigger? | Drops and recreates `sessions_parent_state_au` with `owner_claim_id`, at a per-row cost. | Storage |
+| Which artifacts may an automatic claim cover? | Only artifacts first stored by this harvest: a session with no database row and no saved pair before the run, or a newly created annotation. Sessions first stored while active are included. Forced or web re-processing, `harvest index --all` and rebuilds wait for an explicit claim. | Decision 4; named cases |
+| When does an automatic claim reuse an entry? | Only when the newest entry of the log, by insertion order, is this account's `automatic` entry. Otherwise it appends. Explicit claims always append. | Decision 4 |
+| How is the claim log read? | Newest first (`claimed_at DESC, rowid DESC`), N+1 rows to detect older entries, at most 100 returned, with an older cursor. | Decision 4; Web |
+| What does unlinking mean? | This step ships no unlink. Reassignment is all-or-nothing; the log proves which accounts claimed and when, not what each entry covered. A later unlink is an additive termination table. | Decision 3 |
+| Where does owner permanence live? | In `local-owner.json` beside the store, created or adopted on the first writable open of a current-schema store and at the end of an upgrade; never on a read-only open. Adopted on rebuild. The claim log does not survive a rebuild. | Decision 7 |
+| What does the web need? | Three local routes with fixed controls, request bodies, prompt states, entry/result fields, error statuses, a newest-first 100-entry read bound with an older cursor, and strict automatic-entry reuse. | Web |
+| What does V82 do to the parent-state trigger? | Drops and recreates `sessions_parent_state_au` with `owner_claim_id`, at a per-row cost. | Storage |
 | What keys the prompt decision? | Local owner id plus the normalized account scope. | Decision 6 |
-| What is the authority and the named-case set? | `peasant-labs/polyrepo#71` and its child issues; the renamed reassignment case and `user-claim-json-parity` are named. | Authority; named cases |
+| What is the authority and the named-case set? | `peasant-labs/polyrepo#71` and its child issues; the named-case list and its required proofs. | Authority; named cases |
 | What is the merge order? | This record settles first and is safe alone; the two implementation PRs wait and stay draft. | Merge dependencies |
 
 ## End state
@@ -64,10 +87,11 @@ A current pointer plus an append-only log:
 - `sessions.owner_claim_id` and `annotations.owner_claim_id` are nullable text
   columns. `NULL` means unclaimed.
 - `owner_claims` is the append-only log. A claim entry is one link between the
-  local owner and a Village account at a point in time. An explicit claim
-  appends one entry and then sets the current pointer on the artifacts it
-  covers. An automatic claim reuses the account's latest entry instead of
-  appending one per run (decision 4).
+  local owner and a Village account at a point in time. An explicit claim always
+  appends one entry, even when it moves nothing, and then sets the current
+  pointer on the artifacts it covers. An automatic claim reuses the newest entry
+  only when that entry is this account's `automatic` entry; otherwise it appends
+  one (decision 4).
 - The pointer has no foreign key. `PruneSessions` must keep working, and a
   claim entry must survive the artifact it covered. The log is the history; the
   pointer is the current projection.
@@ -97,8 +121,9 @@ A claim covers local sessions and local annotations.
   persona. `annotator_id` remains the author/producer-side label and is not
   reused as owner.
 - Newly created human annotations from `annotate create`, `annotate import`,
-  and the web annotation handler are claimed when they are stored, reusing the
-  account's latest claim entry. An annotation created on an updated or
+  and the web annotation handler are claimed when they are stored, using the
+  same strict reuse rule as sessions: reuse only the newest `automatic` entry
+  for this account, otherwise append. An annotation created on an updated or
   reindexed session is still a new artifact; the session's own non-new status
   does not suppress the annotation claim.
 - Bindings and associations (`session_commit_associations`,
@@ -123,35 +148,59 @@ each claim covered.
 - `claim --all` and the web claim-all control are explicit reassignments. They
   are documented and labelled as such. They do not delete history.
 - Recovering a single person's rows after a shared-machine reassignment requires
-  a later additive coverage table or termination record. Neither is in V79.
+  a later additive coverage table or termination record. Neither is in V82.
 - Lost or revoked Village access grants nothing. The claim remains evidence
   only.
 
 This narrows peasant#890's "can unlink and re-claim" to "can re-claim from a
-different account, all-or-nothing". The narrowing is deliberate and is the
-scope this record settles.
+different account, all-or-nothing". The requester accepted the narrowing on
+2026-11-18: "yeah, unlink can be left for later. accept narrowing."
 
-### 4. Claim time vs ingest time; automatic claims are new-only
+A later unlink is an additive termination table, not a new `source` value. The
+`source` CHECK constraint cannot change without rebuilding `owner_claims`, and a
+shipped migration is immutable. An unlink record therefore references the claim
+entry it terminates and leaves the log and its CHECK constraint untouched.
 
-The current pointer is authoritative for ownership. The log is ordered by
-`claimed_at` and then insertion order (`rowid`), and each entry has a stable id.
-`claimed_at` is a millisecond wall-clock time.
+### 4. Claim time vs ingest time; automatic claims are first-stored-only
+
+The current pointer is authoritative for ownership. The log is ordered newest
+first: `claimed_at DESC, rowid DESC`. `claimed_at` is a millisecond wall-clock
+time and each entry has a stable id.
 
 - A manual claim records the wall-clock claim time.
-- An automatic claim covers only artifacts the run stored for the first time:
-  - sessions whose result is `DiffNew`;
-  - newly created human annotations from `annotate create`, `annotate import`,
-    and the web annotation handler.
+- An automatic claim covers only artifacts this harvest stored for the first
+  time. "First stored" means the session had no `sessions` database row and no
+  saved pair under `peasant-sync/` before the run, whatever status the pipeline
+  reports. A session first stored while still active is included and is claimed
+  on that first run; the requester ruled on 2026-11-18: "harvest/claiming should
+  properly claim active sessions though." Newly created human annotations from
+  `annotate create`, `annotate import`, and the web annotation handler are
+  claimed when they are stored.
+- The write site reads a `FirstStored` flag on the pipeline result. It must not
+  infer "first stored" from `DiffNew`, `DiffActive` or `DiffUpdated`: `--force`
+  reports a stored session as `DiffNew`, the web one-session ingest sets
+  `Force = true`, and a rebuild from saved copies reports stored sessions as
+  `DiffUpdated`.
+- An automatic claim therefore excludes all of:
+  - `peasant harvest --force` re-processing a stored session;
+  - the web one-session ingest of a stored session;
+  - `peasant harvest index --all` over stored sessions;
+  - a database rebuild from saved pairs.
 
-  It never claims sessions that were updated, reindexed (`peasant harvest index
-  --all` marks every stored session `DiffUpdated`), or rebuilt, even while
-  signed in. Those rows stay unclaimed until the sign-in prompt or an explicit
+  Those rows stay unclaimed until the sign-in prompt or an explicit
   `peasant user claim`.
-- Automatic claiming reuses the account's latest claim entry and appends a new
-  entry only when the account has no entry yet. It does not append one entry per
-  harvest run. Explicit claims (`user claim`, the sign-in prompt, and the web
-  claim controls) append. `source` records why the entry was appended, not why
-  each artifact points at it.
+- Strict reuse: an automatic claim reuses a claim entry only when the newest
+  entry of the whole log for this local owner, by insertion order, is this
+  account's `automatic` entry. Otherwise it appends a new `automatic` entry.
+  Explicit claims (`manual` and `sign_in_prompt`) always append, including when
+  they move nothing and on an empty store. A claim that finds nothing still
+  records its decision and returns its `claimId`. The requester ruled on
+  2026-11-18: "yes: strict reuse. will be the only way we actually have a
+  replayable, durable event stream in the 'durable objects' sense."
+- Replaying the log in insertion order shows, at every point, which account
+  receives new artifacts. Reuse is what makes that replay durable and compact:
+  consecutive harvests by one account add no entries, while every takeover or
+  explicit claim adds one.
 - An automatic claim sets ownership only where the pointer is `NULL`. It never
   moves a row that already belongs to another account.
 - No historical claim times are invented for existing installations. Existing
@@ -162,6 +211,28 @@ The current pointer is authoritative for ownership. The log is ordered by
 - A declined prompt is not a claim. A run after a decline may still claim only
   the artifacts it stored for the first time; it may not claim the rows the
   person declined.
+
+#### Claim-log order and paging
+
+The requester ruled on 2026-11-18: "newest first, with an 'older' cursor. want
+this to be performant too: similar to optimizations we made to improve migration
+performance."
+
+- The order is newest first: `claimed_at DESC, rowid DESC`.
+- The page read is
+  `WHERE local_owner_id = ? [AND (claimed_at, rowid) < (?, ?)]
+  ORDER BY claimed_at DESC, rowid DESC LIMIT 101`. It returns at most 100
+  entries.
+- A cursor (`before` on the wire, `nextBefore` in a status) resolves to its
+  row's `(claimed_at, rowid)` pair.
+- `nextBefore` is the last returned entry's id, present exactly when a 101st
+  row exists. It is absent when fewer than 100 entries are returned.
+- `totalClaims` counts the whole log and decides nothing; in particular it does
+  not decide whether a cursor is present.
+- The page read uses `owner_claims(local_owner_id, claimed_at)`. The reuse
+  lookup uses `owner_claims(local_owner_id, village_url, user_id, claimed_at)`.
+  Neither may take a temporary B-tree sort; a query-plan assertion runs both and
+  fails on `USE TEMP B-TREE`.
 
 ### 5. Account scope
 
@@ -207,7 +278,9 @@ An existing installation that is already signed in is prompted once. On an
 interactive `harvest` or `open`, when signed in, with no decision for the scope
 and unclaimed rows, print a one-time stderr notice with the unclaimed count and
 the `peasant user claim` command, and record that the notice was shown. The
-notice does not interrupt the command.
+notice does not interrupt the command. The requester accepted this reading on
+2026-11-18: "This notice is okay. web and hook notices or UIs can come later."
+Web-only and hook-only installs get no notice until the web prompt ships.
 
 ### 7. Owner permanence
 
@@ -218,31 +291,47 @@ in this format:
 ```json
 {
   "id": "lo_<uuid>",
-  "createdAt": "2026-11-12T00:00:00Z"
+  "createdAt": 1794989016147
 }
 ```
 
-The file is created with owner-only permissions and is never stored inside the
-database. When the store opens after migration and `local_owner` is empty, it
-adopts the file. When the file is missing, it creates the owner once and writes
-the file atomically; it does not create the owner lazily on first read.
-`user show` only reads.
+`createdAt` is an integer Unix millisecond, matching what the store reads and
+writes. The file is created with owner-only permissions and is never stored
+inside the database.
+
+The owner is created or adopted on the first writable open of a current-schema
+store, and at the end of an explicit upgrade. Opening never migrates on its own.
+A read-only open (`OpenReadOnly`) and `WithImmutableReadOnly` never create the
+owner and never write the file; a read-only open of a store with no owner
+reports no owner rather than minting one. `user show` only reads.
+
+- When the file exists and the database has no owner, the store adopts the file.
+- When the database names an owner and the file is missing, the store writes the
+  file from the database atomically; it does not mint a second owner.
+- When both exist and the ids differ, the store refuses to open with an
+  actionable error naming both owner ids and the file path. It does not keep one
+  side silently, because the next rebuild would then switch owners.
 
 A database rebuild that deletes `peasant.db` keeps `local-owner.json`. The new
 store adopts the same id and `createdAt`; the creation time is the original, not
 the rebuild time. The claim log does not survive a database rebuild: a rebuilt
 store starts unclaimed, and the first claim after the rebuild appends the first
-entry (automatic only for a new artifact, otherwise explicit). The peasant
-recovery hints that tell people to delete the database must say both: the owner
-id file is retained, and the claim log is not.
+entry (automatic only for an artifact first stored by that run, otherwise
+explicit). The peasant recovery hints that tell people to delete the database
+must say both: the owner id file is retained, and the claim log is not.
 
 A corrupt or unreadable `local-owner.json` is an error that names the path; the
-store does not silently mint a second owner. Deleting the file is the documented
-way to start a new owner.
+store does not silently mint a second owner. Deleting both the file and the
+store is the documented way to start a new owner.
+
+Tests: `owner-created-after-upgrade-from-v81`, `read-only-open-creates-no-owner`,
+`owner-file-mismatch-refused`.
 
 ## Storage
 
-Migration V79 is the next slot in the live source. (V76 was the next slot when this record was first written; the search-trigger repair, turn-count marker and harness widening landed first as V76–V78. The number is always selected from live source at implementation time.) It adds:
+Migration V82 is the next slot in the live source. `develop` already ships
+V79–V81, so V82 is selected and the index change is folded in before it ships.
+The number is always selected from live source at implementation time. It adds:
 
 ```sql
 CREATE TABLE local_owner (
@@ -310,13 +399,15 @@ CREATE INDEX idx_sessions_owner_claim ON sessions(owner_claim_id);
 CREATE INDEX idx_annotations_owner_claim ON annotations(owner_claim_id);
 ```
 
-The owner-order index leaves the `rowid` tie-break implicit: `ORDER BY claimed_at,
-rowid` is insertion order, not random-id order. Reads of one account's latest
-entry use the scope-order index.
+The owner-order index leaves the `rowid` tie-break implicit:
+`ORDER BY claimed_at DESC, rowid DESC` is newest-first insertion order, not
+random-id order. The page read uses that index; the strict-reuse lookup uses the
+scope-order index. Both are asserted plan-stable: neither may show a temporary
+B-tree sort. The index change is folded into V82 before it ships.
 
 ### Parent-state trigger redefinition
 
-V79 adds `sessions.owner_claim_id`, so the exhaustive parent-state trigger is
+V82 adds `sessions.owner_claim_id`, so the exhaustive parent-state trigger is
 dropped and recreated with that column in its `UPDATE OF` list:
 
 ```sql
@@ -351,7 +442,7 @@ table rewrite. The migration carries the full V73 body; only the changed
 `UPDATE OF` list is shown here.
 
 The next migration number is selected from live source at implementation time;
-at the time of writing it is V79. The migration is forward-only and immutable
+at the time of writing it is V82. The migration is forward-only and immutable
 once shipped. `baseline_schema.sql` is regenerated from the migration chain.
 
 ## CLI
@@ -361,17 +452,20 @@ peasant user show [--json]
 peasant user claim [--all] [--json]
 ```
 
-`user show` reports the local owner id, the ordered claim log, ownership counts,
-and prompt state. It needs no Village login and makes no network call. `user
-claim` requires a valid saved Village credential. No flag claims only unclaimed
-artifacts; `--all` reassigns every local session and annotation. Both append;
-neither rewrites history. `--all` requires `--yes` on a terminal.
+`user show` reports the local owner id, the claim log newest first, ownership
+counts, and prompt state. It needs no Village login and makes no network call.
+`user claim` requires a valid saved Village credential. No flag claims only
+unclaimed artifacts; `--all` reassigns every local session and annotation. Both
+append, always; neither rewrites history. `--all` requires `--yes` on a
+terminal; a non-terminal `--all` does not require `--yes`.
 
 An empty store answers "there is nothing to claim yet" rather than claiming
-nothing silently. `user show` and `user claim` normalize the Village base URL in
-both text and JSON output and use the contract's field names. Progress and
-prompts go to stderr; machine output goes to stdout exactly once. The text and
-JSON facts agree (`user-claim-json-parity`).
+nothing silently. The message can stay: the entry is still appended, it records
+the decision, and the command still returns a `claimId`. `user show` and
+`user claim` normalize the Village base URL in both text and JSON output and use
+the contract's field names. Progress and prompts go to stderr; machine output
+goes to stdout exactly once. The text and JSON facts agree
+(`user-claim-json-parity`).
 
 The sign-in prompt offers:
 
@@ -437,9 +531,9 @@ LocalClaimEntry {
 
 LocalOwnerStatus {
   owner,
-  claims,                      // most recent N (N=100), ordered claimedAt then insertion order
-  totalClaims,
-  nextBefore?,                 // cursor when more than N remain
+  claims,                      // at most 100, newest first (claimedAt DESC, rowid DESC)
+  totalClaims,                 // whole-log count; decides nothing
+  nextBefore?,                 // last returned id, exactly when older entries exist
   prompt,                      // LocalOwnerClaimPrompt
   ownership: { sessions: {total, claimed, unclaimed},
                annotations: {total, claimed, unclaimed} }
@@ -464,15 +558,19 @@ Rules:
 - An absent `owner` means this server does not project owners.
   `{"kind":"unknown"}` means the server projects ownership but withholds the
   identity. Unknown is never a local fallback.
-- The claim order key is `claimed_at` then insertion order (`rowid`); the wire
-  order is the same.
-- An automatic claim reuses the account's latest entry and appends only when the
-  account has no entry. Explicit claims append. `source` and `claimedAt` belong
-  to the entry that was appended, not to each artifact.
-- `claims` is bounded to the most recent 100 entries. `totalClaims` is the true
-  count; `nextBefore` is present only when more than 100 remain. Automatic reuse
-  keeps the log from growing by one entry per harvest; explicit claims can still
-  grow it.
+- The claim order is newest first: `claimed_at DESC, rowid DESC`. A cursor
+  resolves to its row's `(claimed_at, rowid)`.
+- An automatic claim reuses an entry only when the newest entry of the log is
+  this account's `automatic` entry; otherwise it appends. Explicit claims always
+  append, including a claim that moves nothing and a claim on an empty store.
+  `source` and `claimedAt` belong to the entry that was appended, not to each
+  artifact.
+- `claims` is bounded to 100 entries. `nextBefore` is the last returned entry's
+  id and is present exactly when an older entry exists: with 100 returned it is
+  present when a 101st row exists; with fewer than 100 returned it is absent.
+  `totalClaims` is the whole-log count, so `totalClaims >= len(claims)`, and it
+  decides nothing. Automatic reuse keeps the log from growing by one entry per
+  harvest; explicit claims can still grow it.
 - All three routes answer with the same `LocalOwnerStatus` shape. The claim
   route wraps it as `status` and adds `claimed`, `alreadyClaimed`, and
   `claimId?`.
@@ -485,7 +583,7 @@ Rules:
 | route | statuses | meaning |
 |---|---|---|
 | `GET /api/v1/local-owner` | 200, 500 | 500 is a store or projection failure. |
-| `POST /api/v1/local-owner/claim` | 200, 400, 401, 500, 504 | 400 is an invalid body or `all` value; 401 is no valid saved credential; 504 is a Village credential or scope lookup timeout; 500 is a store failure. |
+| `POST /api/v1/local-owner/claim` | 200, 400, 401, 500 | 400 is an invalid body or `all` value; 401 is no valid saved credential; 500 is a store failure. These routes never call Village. |
 | `POST /api/v1/local-owner/decline` | 200, 401, 500 | 401 is no signed-in account to key the scope; 500 is a store or state-file failure. |
 
 The read, claim and decline answers use the same status shape; claim adds the
@@ -493,11 +591,13 @@ result fields. No body repeats the HTTP status.
 
 ### Versions
 
-The released pair has moved past Local 0.36.0 / Types 0.48.0: 0.37.0 /
-0.49.0 and 0.38.0 / 0.50.0 shipped while this record was in review. The next
-free pair at implementation time is **Local 0.39.0 / Types 0.51.0**.
-`peasant-labs/schema#219` targets that pair and freezes 0.38.0 / 0.50.0 in
-`retired_specs.yaml` with its pinned hashes; do not mutate a retired spec.
+The number and pair are chosen from live source at implementation time. On
+2026-11-18 the current choice is **Local 0.39.0 / Types 0.52.0**, retiring
+0.38.0 / 0.51.0. `PeasantLocalAPIVersion = 0.39.0` is still free, while Types
+0.51.0 is already released on `develop` with different content, so the types
+version moves past it. `peasant-labs/schema#219` targets that pair and freezes
+0.38.0 / 0.51.0 in `retired_specs.yaml` with its pinned hashes; do not mutate a
+retired spec. Regenerate with `make schema`; never hand-merge generated files.
 
 The schema change is additive: a schema release, followed by consumer re-pins.
 Until the schema tag exists, consumers co-develop with a local `go.work` and
@@ -541,25 +641,53 @@ store cases live in `internal/store/testdata/local_owner_claim_cases.yaml`.
 - `claim-reassign-other-account-retains-entries` (was
   `claim-unlink-and-reclaim-other-account`; it tests an all-or-nothing
   reassignment, not an unlink)
+- `auto-claim-session-first-seen-active`
+- `auto-claim-skips-forced-reprocess`
+- `auto-claim-skips-web-one-session-ingest`
+- `auto-claim-skips-rebuild-from-saved-pairs`
 - `auto-claim-skips-updated-unclaimed-session`
 - `auto-claim-skips-reindexed-sessions`
 - `auto-claim-skips-rebuilt-sessions`
 - `auto-claim-after-decline-covers-only-new-sessions`
 - `auto-claim-leaves-other-account-rows`
+- `auto-claim-leaves-other-account-annotations`
+- `auto-claim-after-reassign-back`
+- `auto-claim-after-own-manual-claim`
+- `auto-claim-reuses-newest-automatic`
+- `claim-default-nothing-to-move-appends-entry`
+- `claim-empty-store-appends-entry`
+- `owner-created-after-upgrade-from-v81`
+- `read-only-open-creates-no-owner`
+- `owner-file-mismatch-refused`
 - `user-claim-json-parity`
 
 Additional required proofs:
 
+- The four first-stored cases are pipeline-level tests, not pure-function unit
+  tests: `auto-claim-session-first-seen-active`,
+  `auto-claim-skips-forced-reprocess`, `auto-claim-skips-web-one-session-ingest`,
+  `auto-claim-skips-rebuild-from-saved-pairs`.
 - Rebuild adoption: remove `peasant.db`, reopen the store, and assert the same
   local owner id and `createdAt` from `local-owner.json`.
 - Rebuild limit: after the same rebuild, assert the claim log is empty and every
   artifact pointer is `NULL`.
-- `TestMigrationV79AddsLocalOwnerAndClaimLog` proves that each of these fails: a
+- `TestMigrationV82AddsLocalOwnerAndClaimLog` proves that each of these fails: a
   second `local_owner` insert, `UPDATE local_owner`, `DELETE local_owner`,
   `INSERT OR REPLACE` into `owner_claims`, `UPDATE owner_claims`, and `DELETE
   owner_claims`.
+- The page read and the reuse lookup both report no temporary B-tree sort; a
+  query-plan assertion fails on `USE TEMP B-TREE`.
+- Contract paging cases: `owner-status-final-older-page` (50 of 250, no cursor)
+  and `owner-status-full-last-page` (100 of 200, no cursor) must pass, while
+  `owner-status-cursor-on-short-page` and `owner-status-ascending-page` must
+  fail.
 - Removing `owner_claim_id IS NULL` or the account filter from a claim must make
   a case fail.
+- Removing `FirstStored` in favour of `DiffNew` must fail
+  `auto-claim-session-first-seen-active` and
+  `auto-claim-skips-forced-reprocess`.
+- Removing strict reuse must fail `auto-claim-after-reassign-back` and
+  `auto-claim-after-own-manual-claim`.
 - The `ClaimSource` parser rejects an unknown source and the set test asserts
   exact membership.
 - The claim path is measured on a synthetic large store and the margin is
@@ -570,11 +698,11 @@ Additional required proofs:
 
 ## Migration review account
 
-- The migration applies to a populated V75 fixture database, not a hand-written
+- The migration applies to a populated V81 fixture database, not a hand-written
   schema.
 - `baseline_schema.sql` is regenerated from the migration chain.
 - The exact-name schema catalog, migration-slot registry, predecessor pin and
-  hardcoded head-version assertions move to V79 in the same change.
+  hardcoded head-version assertions move to V82 in the same change.
 - The migration comment records that the claim FK joins the
   collective-observation scope cache and that a claimed scope row is permanent;
   claim code never deletes a scope row.
@@ -585,22 +713,23 @@ Additional required proofs:
 
 - Nothing must merge before this record. It is documentation only: it changes
   no code, contract or migration, and is safe to merge on its own.
-- `peasant-labs/peasant#951` waits for this record. It must not merge until the
-  rulings here are settled. V79 is immutable once shipped, so a wrong
-  automatic-claim rule or DDL cannot be corrected forward-only.
-- `peasant-labs/schema#219` waits for this record. It must not merge until the
-  rulings here are settled and it has moved to Local 0.39.0 / Types 0.51.0.
-- Both implementation PRs are ready for review. The maintainers decide the
-  merge order. The rulings here still govern them: if either lands first, it
-  must match this record, and the other must follow rather than redo a contract
-  or migration in a different shape.
+- `peasant-labs/peasant#951` waits for this record. It must not merge until this
+  revision lands. V82 is immutable once shipped, so a wrong automatic-claim rule
+  or DDL cannot be corrected forward-only.
+- `peasant-labs/schema#219` waits for this record. It must not merge until this
+  revision lands and it has moved to the version pair named under Versions.
+- Both implementation PRs are built from this record and each must address its
+  own review and rebase before merge. The maintainers decide the merge order.
+  The rulings here still govern them: if either lands first, it must match this
+  record, and the other must follow rather than redo a contract or migration in
+  a different shape.
 - The schema release follows schema#219; the peasant re-pin follows the schema
   tag. Neither blocks merging this record.
 
 ## Out of scope
 
 - A per-artifact unlink, coverage table, or termination record. A termination
-  record is additive later; nothing in V79 prevents it.
+  table is additive later; nothing in V82 prevents it.
 - Comments on other people's transcripts.
 - Fork or continuation of another person's transcript.
 - Review requests and delegation chains.
@@ -632,13 +761,13 @@ Container diagram: peasant
 |  | peasant backend           |<-- reads and claims ownership (HTTP) --| peasant web               | |
 |  | [Container: Go]           |                                        | [Container: Next.js 15]   | |
 |  | Runs the user commands,   |                                        | Claim control on the      | |
-|  | the prompt, and ingest.   |                                        | Local API 0.39.0.         | |
+|  | the prompt, and ingest.   |                                        | local API owner routes.   | |
 |  +---------------------------+                                        +---------------------------+ |
 |        |              |                                                                             |
 |        |              +-- reads account, records prompt (JSON files) ---------+                     |
 |        |                                                                      |                     |
 |        | appends claims, sets owner                                           |                     |
-|        | pointers (SQL, migration V79)                                        |                     |
+|        | pointers (SQL, owner/claim migration)                                |                     |
 |        v                                                                      v                     |
 |  +---------------------------+                                        +---------------------------+ |
 |  | peasant session store     |                                        | account and prompt files  | |
@@ -655,6 +784,6 @@ Key:
   Arrow = one relationship, read as "source, label (technology), target".
 ```
 
-This record rules the store arrow (V79) and the web arrow (Local API 0.39.0).
-The store claim path writes only local state; the web claim route can surface a
-Village credential or scope lookup timeout as 504.
+This record rules the store arrow (the owner/claim migration) and the web arrow
+(the local API owner routes). No claim path calls Village: the store claim path
+and the web claim route read only local state and local credential files.
